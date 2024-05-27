@@ -3,18 +3,27 @@ import 'package:flutter_k_chart/flutter_k_chart.dart';
 
 class VolRenderer extends BaseChartRenderer<VolumeEntity> {
   late double mVolWidth;
-  final ChartStyle chartStyle;
-  final ChartColors chartColors;
+  final ChartStyle style;
+  final ChartColors colors;
+  final String Function(double value)? dataFormat;
 
-  VolRenderer(Rect mainRect, double maxValue, double minValue, double topPadding, int fixedLength, this.chartStyle, this.chartColors) : super(
-    chartRect: mainRect,
+  VolRenderer({
+    required Rect rect,
+    required double maxValue,
+    required double minValue,
+    required double topPadding,
+    required this.style,
+    required this.colors,
+    this.dataFormat
+  }) : super(
+    chartRect: rect,
     maxValue: maxValue,
     minValue: minValue,
     topPadding: topPadding,
-    fixedLength: fixedLength,
-    gridColor: chartColors.gridColor
-    ) {
-    mVolWidth = this.chartStyle.volWidth;
+    dataFormat: dataFormat,
+    gridColor: colors.gridColor
+  ) {
+    mVolWidth = this.style.volWidth;
   }
 
   @override
@@ -26,16 +35,16 @@ class VolRenderer extends BaseChartRenderer<VolumeEntity> {
     if (curPoint.vol != 0) {
       canvas.drawRect(
         Rect.fromLTRB(curX - r, top, curX + r, bottom),
-        chartPaint..color = curPoint.close > curPoint.open ? this.chartColors.upColor : this.chartColors.dnColor
+        chartPaint..color = curPoint.close > curPoint.open ? this.colors.upColor : this.colors.dnColor
       );
     }
 
     if (lastPoint.MA5Volume != 0) {
-      drawLine(lastPoint.MA5Volume, curPoint.MA5Volume, canvas, lastX, curX, this.chartColors.ma5Color);
+      drawLine(lastPoint.MA5Volume, curPoint.MA5Volume, canvas, lastX, curX, this.colors.ma5Color);
     }
 
     if (lastPoint.MA10Volume != 0) {
-      drawLine(lastPoint.MA10Volume, curPoint.MA10Volume, canvas, lastX, curX, this.chartColors.ma10Color);
+      drawLine(lastPoint.MA10Volume, curPoint.MA10Volume, canvas, lastX, curX, this.colors.ma10Color);
     }
   }
 
@@ -47,15 +56,15 @@ class VolRenderer extends BaseChartRenderer<VolumeEntity> {
       children: [
         TextSpan(
             text: "VOL:${NumberUtil.format(data.vol)}    ",
-            style: getTextStyle(this.chartColors.volColor)),
+            style: getTextStyle(this.colors.volColor)),
         if (data.MA5Volume.notNullOrZero)
           TextSpan(
               text: "MA5:${NumberUtil.format(data.MA5Volume!)}    ",
-              style: getTextStyle(this.chartColors.ma5Color)),
+              style: getTextStyle(this.colors.ma5Color)),
         if (data.MA10Volume.notNullOrZero)
           TextSpan(
               text: "MA10:${NumberUtil.format(data.MA10Volume!)}    ",
-              style: getTextStyle(this.chartColors.ma10Color)),
+              style: getTextStyle(this.colors.ma10Color)),
       ],
     );
     TextPainter tp = TextPainter(text: span, textDirection: TextDirection.ltr);

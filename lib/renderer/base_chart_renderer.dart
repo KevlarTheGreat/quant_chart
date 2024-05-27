@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 export '../chart_style.dart';
 
 abstract class BaseChartRenderer<T> {
-  double maxValue, minValue;
+  double maxValue;
+  double minValue;
   late double scaleY;
   double topPadding;
   Rect chartRect;
-  int fixedLength;
+  final String Function(double value)? dataFormat;
+
   Paint chartPaint = Paint()
     ..isAntiAlias = true
     ..filterQuality = FilterQuality.high
@@ -24,8 +26,8 @@ abstract class BaseChartRenderer<T> {
     required this.maxValue,
     required this.minValue,
     required this.topPadding,
-    required this.fixedLength,
     required Color gridColor,
+    this.dataFormat
   }) {
     if (maxValue == minValue) {
       maxValue *= 1.5;
@@ -33,17 +35,15 @@ abstract class BaseChartRenderer<T> {
     }
     scaleY = chartRect.height / (maxValue - minValue);
     gridPaint.color = gridColor;
-    // print("maxValue=====" + maxValue.toString() + "====minValue===" + minValue.toString() + "==scaleY==" + scaleY.toString());
   }
 
   double getY(double y) => (maxValue - y) * scaleY + chartRect.top;
 
   String format(double? n) {
-    if (n == null || n.isNaN) {
-      return "0.00";
-    } else {
-      return n.toStringAsFixed(fixedLength);
-    }
+    if (n == null || n.isNaN) return '0.00';
+    if (dataFormat != null) return dataFormat!(n);
+
+    return n.toStringAsFixed(2);
   }
 
   void drawGrid(Canvas canvas, int gridRows, int gridColumns);
@@ -52,20 +52,14 @@ abstract class BaseChartRenderer<T> {
 
   void drawVerticalText(canvas, textStyle, int gridRows);
 
-  void drawChart(T lastPoint, T curPoint, double lastX, double curX, Size size,
-      Canvas canvas);
+  void drawChart(T lastPoint, T curPoint, double lastX, double curX, Size size, Canvas canvas);
 
-  void drawLine(double? lastPrice, double? curPrice, Canvas canvas,
-      double lastX, double curX, Color color) {
-    if (lastPrice == null || curPrice == null) {
-      return;
-    }
-    //("lasePrice==" + lastPrice.toString() + "==curPrice==" + curPrice.toString());
-    double lastY = getY(lastPrice);
-    double curY = getY(curPrice);
-    //print("lastX-----==" + lastX.toString() + "==lastY==" + lastY.toString() + "==curX==" + curX.toString() + "==curY==" + curY.toString());
-    canvas.drawLine(
-        Offset(lastX, lastY), Offset(curX, curY), chartPaint..color = color);
+  void drawLine(double? lastPrice, double? curPrice, Canvas canvas, double lastX, double curX, Color color) {
+    if (lastPrice == null || curPrice == null) return;
+
+    final lastY = getY(lastPrice);
+    final curY = getY(curPrice);
+    canvas.drawLine(Offset(lastX, lastY), Offset(curX, curY), chartPaint..color = color);
   }
 
   TextStyle getTextStyle(Color color) {

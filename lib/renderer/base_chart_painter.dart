@@ -40,13 +40,13 @@ abstract class BaseChartPainter extends CustomPainter {
       mMainLowMinValue = double.maxFinite;
   int mItemCount = 0;
   double mDataLen = 0.0; //数据占屏幕总长度
-  final ChartStyle chartStyle;
+  final ChartStyle style;
   late double mPointWidth;
   List<String> mFormats = [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn]; //格式化时间
   double xFrontPadding;
 
-  BaseChartPainter(
-    this.chartStyle, {
+  BaseChartPainter({
+    required this.style,
     this.data,
     required this.scaleX,
     required this.scrollX,
@@ -61,19 +61,19 @@ abstract class BaseChartPainter extends CustomPainter {
     this.isLine = false,
   }) {
     mItemCount = data?.length ?? 0;
-    mPointWidth = this.chartStyle.pointWidth;
-    mTopPadding = this.chartStyle.topPadding;
-    mBottomPadding = this.chartStyle.bottomPadding;
-    mChildPadding = this.chartStyle.childPadding;
-    mGridRows = this.chartStyle.gridRows;
-    mGridColumns = this.chartStyle.gridColumns;
+    mPointWidth = style.pointWidth;
+    mTopPadding = style.topPadding;
+    mBottomPadding = style.bottomPadding;
+    mChildPadding = style.childPadding;
+    mGridRows = style.gridRows;
+    mGridColumns = style.gridColumns;
     mDataLen = mItemCount * mPointWidth;
     initFormats();
   }
 
   void initFormats() {
-    if (this.chartStyle.dateTimeFormat != null) {
-      mFormats = this.chartStyle.dateTimeFormat!;
+    if (style.dateTimeFormat != null) {
+      mFormats = style.dateTimeFormat!;
       return;
     }
 

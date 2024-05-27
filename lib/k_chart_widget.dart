@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
 import 'package:flutter_k_chart/chart_translations.dart';
 import 'package:flutter_k_chart/extension/map_ext.dart';
 import 'package:flutter_k_chart/flutter_k_chart.dart';
@@ -34,8 +35,6 @@ class KChartWidget extends StatefulWidget {
   final bool isLine;
   final bool isTapShowInfoDialog; //是否开启单击显示详情数据
   final bool hideGrid;
-  @Deprecated('Use `translations` instead.')
-  final bool isChinese;
   final bool showNowPrice;
   final bool showInfoDialog;
   final bool materialInfoDialog; // Material风格的信息弹窗
@@ -45,7 +44,6 @@ class KChartWidget extends StatefulWidget {
   //当屏幕滚动到尽头会调用，真为拉到屏幕右侧尽头，假为拉到屏幕左侧尽头
   final Function(bool)? onLoadMore;
 
-  final int fixedLength;
   final List<int> maDayList;
   final int flingTime;
   final double flingRatio;
@@ -56,43 +54,46 @@ class KChartWidget extends StatefulWidget {
   final VerticalTextAlignment verticalTextAlignment;
   final bool isTrendLine;
   final double xFrontPadding;
+  final String Function(double value)? dataFormat;
 
   KChartWidget(
     this.data,
     this.chartStyle,
-    this.chartColors, {
-    required this.isTrendLine,
-    this.xFrontPadding = 100,
-    this.mainState = MainState.MA,
-    this.secondaryState = SecondaryState.MACD,
-    this.onSecondaryTap,
-    this.volHidden = false,
-    this.isLine = false,
-    this.isTapShowInfoDialog = false,
-    this.hideGrid = false,
-    @Deprecated('Use `translations` instead.') this.isChinese = false,
-    this.showNowPrice = true,
-    this.showInfoDialog = true,
-    this.materialInfoDialog = true,
-    this.translations = kChartTranslations,
-    this.timeFormat = TimeFormat.YEAR_MONTH_DAY,
-    this.onLoadMore,
-    this.fixedLength = 2,
-    this.maDayList = const [5, 10, 20],
-    this.flingTime = 600,
-    this.flingRatio = 0.5,
-    this.flingCurve = Curves.decelerate,
-    this.isOnDrag,
-    this.verticalTextAlignment = VerticalTextAlignment.left,
-  });
+    this.chartColors,
+    {
+      required this.isTrendLine,
+      this.xFrontPadding = 100,
+      this.mainState = MainState.MA,
+      this.secondaryState = SecondaryState.MACD,
+      this.onSecondaryTap,
+      this.volHidden = false,
+      this.isLine = false,
+      this.isTapShowInfoDialog = false,
+      this.hideGrid = false,
+      this.showNowPrice = true,
+      this.showInfoDialog = true,
+      this.materialInfoDialog = true,
+      this.translations = kChartTranslations,
+      this.timeFormat = TimeFormat.YEAR_MONTH_DAY,
+      this.onLoadMore,
+      this.maDayList = const [5, 10, 20],
+      this.flingTime = 600,
+      this.flingRatio = 0.5,
+      this.flingCurve = Curves.decelerate,
+      this.isOnDrag,
+      this.verticalTextAlignment = VerticalTextAlignment.left,
+      this.dataFormat
+    }
+  );
 
   @override
   _KChartWidgetState createState() => _KChartWidgetState();
 }
 
-class _KChartWidgetState extends State<KChartWidget>
-    with TickerProviderStateMixin {
-  double mScaleX = 1.0, mScrollX = 0.0, mSelectX = 0.0;
+class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMixin {
+  double mScaleX = 1.0;
+  double mScrollX = 0.0;
+  double mSelectX = 0.0;
   StreamController<InfoWindowEntity?>? mInfoWindowStream;
   double mHeight = 0, mWidth = 0;
   AnimationController? _controller;
@@ -106,22 +107,16 @@ class _KChartWidgetState extends State<KChartWidget>
   bool waitingForOtherPairOfCords = false;
   bool enableCordRecord = false;
 
-  double getMinScrollX() {
-    return mScaleX;
-  }
+  double getMinScrollX() => mScaleX;
 
   double _lastScale = 1.0;
-  bool isDrag = false, isLongPress = false, isOnTap = false;
+  bool isLongPress = false;
+  bool isOnTap = false;
 
   @override
   void initState() {
     super.initState();
     mInfoWindowStream = StreamController<InfoWindowEntity?>();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
   }
 
   @override
@@ -137,9 +132,10 @@ class _KChartWidgetState extends State<KChartWidget>
       mScrollX = mSelectX = 0.0;
       mScaleX = 1.0;
     }
+
     final _painter = ChartPainter(
-      widget.chartStyle,
-      widget.chartColors,
+      style: widget.chartStyle,
+      colors: widget.chartColors,
       lines: lines, //For TrendLine
       xFrontPadding: widget.xFrontPadding,
       isTrendLine: widget.isTrendLine, //For TrendLine
@@ -158,9 +154,9 @@ class _KChartWidgetState extends State<KChartWidget>
       hideGrid: widget.hideGrid,
       showNowPrice: widget.showNowPrice,
       sink: mInfoWindowStream?.sink,
-      fixedLength: widget.fixedLength,
       maDayList: widget.maDayList,
       verticalTextAlignment: widget.verticalTextAlignment,
+      dataFormat: widget.dataFormat
     );
 
     return LayoutBuilder(
@@ -197,7 +193,7 @@ class _KChartWidgetState extends State<KChartWidget>
             }
           },
           onScaleUpdate: (details) {
-            if (isDrag || isLongPress) return;
+            if (isLongPress) return;
             mScaleX = (_lastScale * details.scale).clamp(0.5, 2.2);
             mScrollX = (details.focalPointDelta.dx / mScaleX + mScrollX).clamp(0.0, ChartPainter.maxScrollX).toDouble();
             notifyChanged();
@@ -248,16 +244,13 @@ class _KChartWidgetState extends State<KChartWidget>
             notifyChanged();
           },
           child: Stack(
-            children: <Widget>[
-              CustomPaint(
-                size: Size(double.infinity, double.infinity),
-                painter: _painter,
-              ),
+            children: [
+              CustomPaint(size: Size(double.infinity, double.infinity), painter: _painter),
               if (widget.showInfoDialog) _buildInfoDialog()
-            ],
-          ),
+            ]
+          )
         );
-      },
+      }
     );
   }
 
@@ -267,77 +260,79 @@ class _KChartWidgetState extends State<KChartWidget>
 
   Widget _buildInfoDialog() {
     return StreamBuilder<InfoWindowEntity?>(
-        stream: mInfoWindowStream?.stream,
-        builder: (context, snapshot) {
-          if ((!isLongPress && !isOnTap) ||
-              widget.isLine == true ||
-              !snapshot.hasData ||
-              snapshot.data?.kLineEntity == null) return Container();
-          KLineEntity entity = snapshot.data!.kLineEntity;
-          double upDown = entity.change ?? entity.close - entity.open;
-          double upDownPercent = entity.ratio ?? (upDown / entity.open) * 100;
-          final double? entityAmount = entity.amount;
-          infos = [
-            getDate(entity.time),
-            entity.open.toStringAsFixed(widget.fixedLength),
-            entity.high.toStringAsFixed(widget.fixedLength),
-            entity.low.toStringAsFixed(widget.fixedLength),
-            entity.close.toStringAsFixed(widget.fixedLength),
-            "${upDown > 0 ? "+" : ""}${upDown.toStringAsFixed(widget.fixedLength)}",
-            "${upDownPercent > 0 ? "+" : ''}${upDownPercent.toStringAsFixed(2)}%",
-            if (entityAmount != null) entityAmount.toInt().toString()
-          ];
-          final dialogPadding = 4.0;
-          final dialogWidth = mWidth / 3;
-          return Container(
-            margin: EdgeInsets.only(
-                left: snapshot.data!.isLeft
-                    ? dialogPadding
-                    : mWidth - dialogWidth - dialogPadding,
-                top: 25),
-            width: dialogWidth,
-            decoration: BoxDecoration(
-                color: widget.chartColors.selectFillColor,
-                border: Border.all(
-                    color: widget.chartColors.selectBorderColor, width: 0.5)),
-            child: ListView.builder(
-              padding: EdgeInsets.all(dialogPadding),
-              itemCount: infos.length,
-              itemExtent: 14.0,
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                final translations = widget.translations.of(context);
-                return _buildItem(
-                  infos[index],
-                  translations.byIndex(index),
-                );
-              },
-            ),
-          );
-        });
+      stream: mInfoWindowStream?.stream,
+      builder: (context, snapshot) {
+        if ((!isLongPress && !isOnTap) || widget.isLine == true || !snapshot.hasData || snapshot.data?.kLineEntity == null) return Container();
+
+        final entity = snapshot.data!.kLineEntity;
+        final upDown = entity.change ?? entity.close - entity.open;
+        final upDownPercent = entity.ratio ?? (upDown / entity.open) * 100;
+        final entityAmount = entity.amount;
+
+        infos = [
+          getDate(entity.time),
+          format(entity.open),
+          format(entity.high),
+          format(entity.low),
+          format(entity.close),
+          '${upDown > 0 ? '+' : ''}${format(upDown)}',
+          '${upDownPercent > 0 ? '+' : ''}${upDownPercent.toStringAsFixed(2)}%',
+          if (entityAmount != null) entityAmount.toInt().toString()
+        ];
+        final dialogPadding = 4.0;
+        final dialogWidth = mWidth / 3;
+        return Container(
+          margin: EdgeInsets.only(left: snapshot.data!.isLeft ? dialogPadding : mWidth - dialogWidth - dialogPadding, top: 25),
+          width: dialogWidth,
+          decoration: BoxDecoration(
+            color: widget.chartColors.selectFillColor,
+            border: Border.all(color: widget.chartColors.selectBorderColor, width: 0.5)
+          ),
+          child: ListView.builder(
+            padding: EdgeInsets.all(dialogPadding),
+            itemCount: infos.length,
+            itemExtent: 14.0,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              final translations = widget.translations.of(context);
+              return _buildItem(infos[index], translations.byIndex(index));
+            }
+          )
+        );
+      }
+    );
   }
 
   Widget _buildItem(String info, String infoName) {
-    Color color = widget.chartColors.infoWindowNormalColor;
-    if (info.startsWith("+"))
-      color = widget.chartColors.infoWindowUpColor;
-    else if (info.startsWith("-")) color = widget.chartColors.infoWindowDnColor;
     final infoWidget = Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Expanded(
-            child: Text("$infoName",
-                style: TextStyle(
-                    color: widget.chartColors.infoWindowTitleColor,
-                    fontSize: 10.0))),
-        Text(info, style: TextStyle(color: color, fontSize: 10.0)),
-      ],
+      children: [
+        Expanded(child: Text(infoName, style: TextStyle(color: widget.chartColors.infoWindowTitleColor, fontSize: 10.0))),
+        Text(info, style: TextStyle(color: _getItemColor(info), fontSize: 10.0))
+      ]
     );
-    return widget.materialInfoDialog
-        ? Material(color: Colors.transparent, child: infoWidget)
-        : infoWidget;
+
+    return widget.materialInfoDialog ? Material(color: Colors.transparent, child: infoWidget) : infoWidget;
+  }
+
+  Color _getItemColor(String info) {
+    if (info.startsWith('+')) return widget.chartColors.infoWindowUpColor;
+    if (info.startsWith('-')) return widget.chartColors.infoWindowDnColor;
+    return widget.chartColors.infoWindowNormalColor;
   }
 
   String getDate(int? date) => dateFormat(DateTime.fromMillisecondsSinceEpoch(date ?? DateTime.now().millisecondsSinceEpoch), widget.timeFormat);
+
+  String format(double value) {
+    if (widget.dataFormat != null) return widget.dataFormat!(value);
+    return value.toStringAsFixed(_length);
+  }
+
+  int get _length {
+    if (widget.data?.isEmpty ?? true) return 2;
+
+    final t = widget.data!.first;
+    return NumberUtil.getMaxDecimalLength(t.open, t.close, t.high, t.low);
+  }
 }
