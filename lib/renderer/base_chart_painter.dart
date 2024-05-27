@@ -1,19 +1,17 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart'
-    show Color, TextStyle, Rect, Canvas, Size, CustomPainter;
-import 'package:k_chart/utils/date_format_util.dart';
+import 'package:flutter/material.dart' show Color, TextStyle, Rect, Canvas, Size, CustomPainter;
+import 'package:flutter_k_chart/utils/date_format_util.dart';
 
 import '../chart_style.dart' show ChartStyle;
 import '../entity/k_line_entity.dart';
 import '../k_chart_widget.dart';
 
-export 'package:flutter/material.dart'
-    show Color, required, TextStyle, Rect, Canvas, Size, CustomPainter;
+export 'package:flutter/material.dart' show Color, required, TextStyle, Rect, Canvas, Size, CustomPainter;
 
 abstract class BaseChartPainter extends CustomPainter {
   static double maxScrollX = 0.0;
-  List<KLineEntity>? datas;
+  List<KLineEntity>? data;
   MainState mainState;
 
   SecondaryState secondaryState;
@@ -49,7 +47,7 @@ abstract class BaseChartPainter extends CustomPainter {
 
   BaseChartPainter(
     this.chartStyle, {
-    this.datas,
+    this.data,
     required this.scaleX,
     required this.scrollX,
     required this.isLongPress,
@@ -62,7 +60,7 @@ abstract class BaseChartPainter extends CustomPainter {
     this.secondaryState = SecondaryState.MACD,
     this.isLine = false,
   }) {
-    mItemCount = datas?.length ?? 0;
+    mItemCount = data?.length ?? 0;
     mPointWidth = this.chartStyle.pointWidth;
     mTopPadding = this.chartStyle.topPadding;
     mBottomPadding = this.chartStyle.bottomPadding;
@@ -84,8 +82,8 @@ abstract class BaseChartPainter extends CustomPainter {
       return;
     }
 
-    int firstTime = datas!.first.time ?? 0;
-    int secondTime = datas![1].time ?? 0;
+    int firstTime = data!.first.time ?? 0;
+    int secondTime = data![1].time ?? 0;
     int time = secondTime - firstTime;
     time ~/= 1000;
     //月线
@@ -112,12 +110,12 @@ abstract class BaseChartPainter extends CustomPainter {
     canvas.scale(1, 1);
     drawBg(canvas, size);
     drawGrid(canvas);
-    if (datas != null && datas!.isNotEmpty) {
+    if (data != null && data!.isNotEmpty) {
       drawChart(canvas, size);
       drawVerticalText(canvas);
       drawDate(canvas, size);
 
-      drawText(canvas, datas!.last, 5);
+      drawText(canvas, data!.last, 5);
       drawMaxAndMin(canvas);
       drawNowPrice(canvas);
 
@@ -187,14 +185,14 @@ abstract class BaseChartPainter extends CustomPainter {
   }
 
   calculateValue() {
-    if (datas == null) return;
-    if (datas!.isEmpty) return;
+    if (data == null) return;
+    if (data!.isEmpty) return;
     maxScrollX = getMinTranslateX().abs();
     setTranslateXFromScrollX(scrollX);
     mStartIndex = indexOfTranslateX(xToTranslateX(0));
     mStopIndex = indexOfTranslateX(xToTranslateX(mWidth));
     for (int i = mStartIndex; i <= mStopIndex; i++) {
-      var item = datas![i];
+      var item = data![i];
       getMainMaxMinValue(item, i);
       getVolMaxMinValue(item);
       getSecondaryMaxMinValue(item);
@@ -322,9 +320,9 @@ abstract class BaseChartPainter extends CustomPainter {
   double getX(int position) => position * mPointWidth + mPointWidth / 2;
 
   KLineEntity getItem(int position) {
-    return datas![position];
-    // if (datas != null) {
-    //   return datas[position];
+    return data![position];
+    // if (data != null) {
+    //   return data[position];
     // } else {
     //   return null;
     // }
@@ -363,8 +361,8 @@ abstract class BaseChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(BaseChartPainter oldDelegate) {
     return true;
-//    return oldDelegate.datas != datas ||
-//        oldDelegate.datas?.length != datas?.length ||
+//    return oldDelegate.data != data ||
+//        oldDelegate.data?.length != data?.length ||
 //        oldDelegate.scaleX != scaleX ||
 //        oldDelegate.scrollX != scrollX ||
 //        oldDelegate.isLongPress != isLongPress ||

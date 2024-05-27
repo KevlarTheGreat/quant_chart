@@ -1,31 +1,32 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:k_chart/chart_translations.dart';
-import 'package:k_chart/extension/map_ext.dart';
-import 'package:k_chart/flutter_k_chart.dart';
+import 'package:flutter_k_chart/chart_translations.dart';
+import 'package:flutter_k_chart/extension/map_ext.dart';
+import 'package:flutter_k_chart/flutter_k_chart.dart';
 
-enum MainState { MA, BOLL, NONE }
+enum MainState {
+  MA,
+  BOLL,
+  NONE
+}
 
-enum SecondaryState { MACD, KDJ, RSI, WR, CCI, NONE }
+enum SecondaryState {
+  MACD,
+  KDJ,
+  RSI,
+  WR,
+  CCI,
+  NONE
+}
 
 class TimeFormat {
   static const List<String> YEAR_MONTH_DAY = [yyyy, '-', mm, '-', dd];
-  static const List<String> YEAR_MONTH_DAY_WITH_HOUR = [
-    yyyy,
-    '-',
-    mm,
-    '-',
-    dd,
-    ' ',
-    HH,
-    ':',
-    nn
-  ];
+  static const List<String> YEAR_MONTH_DAY_WITH_HOUR = [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn];
 }
 
 class KChartWidget extends StatefulWidget {
-  final List<KLineEntity>? datas;
+  final List<KLineEntity>? data;
   final MainState mainState;
   final bool volHidden;
   final SecondaryState secondaryState;
@@ -57,7 +58,7 @@ class KChartWidget extends StatefulWidget {
   final double xFrontPadding;
 
   KChartWidget(
-    this.datas,
+    this.data,
     this.chartStyle,
     this.chartColors, {
     required this.isTrendLine,
@@ -99,10 +100,10 @@ class _KChartWidgetState extends State<KChartWidget>
 
   //For TrendLine
   List<TrendLine> lines = [];
-  double? changeinXposition;
-  double? changeinYposition;
+  double? changeInXPosition;
+  double? changeInYPosition;
   double mSelectY = 0.0;
-  bool waitingForOtherPairofCords = false;
+  bool waitingForOtherPairOfCords = false;
   bool enableCordRecord = false;
 
   double getMinScrollX() {
@@ -110,7 +111,7 @@ class _KChartWidgetState extends State<KChartWidget>
   }
 
   double _lastScale = 1.0;
-  bool isScale = false, isDrag = false, isLongPress = false, isOnTap = false;
+  bool isDrag = false, isLongPress = false, isOnTap = false;
 
   @override
   void initState() {
@@ -132,7 +133,7 @@ class _KChartWidgetState extends State<KChartWidget>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.datas != null && widget.datas!.isEmpty) {
+    if (widget.data != null && widget.data!.isEmpty) {
       mScrollX = mSelectX = 0.0;
       mScaleX = 1.0;
     }
@@ -143,7 +144,7 @@ class _KChartWidgetState extends State<KChartWidget>
       xFrontPadding: widget.xFrontPadding,
       isTrendLine: widget.isTrendLine, //For TrendLine
       selectY: mSelectY, //For TrendLine
-      datas: widget.datas,
+      data: widget.data,
       scaleX: mScaleX,
       scrollX: mScrollX,
       selectX: mSelectX,
@@ -169,17 +170,13 @@ class _KChartWidgetState extends State<KChartWidget>
 
         return GestureDetector(
           onTapUp: (details) {
-            if (!widget.isTrendLine &&
-                widget.onSecondaryTap != null &&
-                _painter.isInSecondaryRect(details.localPosition)) {
+            if (!widget.isTrendLine && widget.onSecondaryTap != null && _painter.isInSecondaryRect(details.localPosition)) {
               widget.onSecondaryTap!();
             }
 
-            if (!widget.isTrendLine &&
-                _painter.isInMainRect(details.localPosition)) {
+            if (!widget.isTrendLine && _painter.isInMainRect(details.localPosition)) {
               isOnTap = true;
-              if (mSelectX != details.localPosition.dx &&
-                  widget.isTapShowInfoDialog) {
+              if (mSelectX != details.localPosition.dx &&  widget.isTapShowInfoDialog) {
                 mSelectX = details.localPosition.dx;
                 notifyChanged();
               }
@@ -187,48 +184,25 @@ class _KChartWidgetState extends State<KChartWidget>
             if (widget.isTrendLine && !isLongPress && enableCordRecord) {
               enableCordRecord = false;
               Offset p1 = Offset(getTrendLineX(), mSelectY);
-              if (!waitingForOtherPairofCords)
-                lines.add(TrendLine(
-                    p1, Offset(-1, -1), trendLineMax!, trendLineScale!));
+              if (!waitingForOtherPairOfCords) lines.add(TrendLine(p1, Offset(-1, -1), trendLineMax!, trendLineScale!));
 
-              if (waitingForOtherPairofCords) {
-                var a = lines.last;
+              if (waitingForOtherPairOfCords) {
                 lines.removeLast();
-                lines.add(TrendLine(a.p1, p1, trendLineMax!, trendLineScale!));
-                waitingForOtherPairofCords = false;
+                lines.add(TrendLine(lines.last.p1, p1, trendLineMax!, trendLineScale!));
+                waitingForOtherPairOfCords = false;
               } else {
-                waitingForOtherPairofCords = true;
+                waitingForOtherPairOfCords = true;
               }
               notifyChanged();
             }
           },
-          onHorizontalDragDown: (details) {
-            isOnTap = false;
-            _stopAnimation();
-            _onDragChanged(true);
-          },
-          onHorizontalDragUpdate: (details) {
-            if (isScale || isLongPress) return;
-            mScrollX = ((details.primaryDelta ?? 0) / mScaleX + mScrollX)
-                .clamp(0.0, ChartPainter.maxScrollX)
-                .toDouble();
-            notifyChanged();
-          },
-          onHorizontalDragEnd: (DragEndDetails details) {
-            var velocity = details.velocity.pixelsPerSecond.dx;
-            _onFling(velocity);
-          },
-          onHorizontalDragCancel: () => _onDragChanged(false),
-          onScaleStart: (_) {
-            isScale = true;
-          },
           onScaleUpdate: (details) {
             if (isDrag || isLongPress) return;
             mScaleX = (_lastScale * details.scale).clamp(0.5, 2.2);
+            mScrollX = (details.focalPointDelta.dx / mScaleX + mScrollX).clamp(0.0, ChartPainter.maxScrollX).toDouble();
             notifyChanged();
           },
           onScaleEnd: (_) {
-            isScale = false;
             _lastScale = mScaleX;
           },
           onLongPressStart: (details) {
@@ -241,33 +215,29 @@ class _KChartWidgetState extends State<KChartWidget>
               notifyChanged();
             }
             //For TrendLine
-            if (widget.isTrendLine && changeinXposition == null) {
-              mSelectX = changeinXposition = details.localPosition.dx;
-              mSelectY = changeinYposition = details.globalPosition.dy;
+            if (widget.isTrendLine && changeInXPosition == null) {
+              mSelectX = changeInXPosition = details.localPosition.dx;
+              mSelectY = changeInYPosition = details.globalPosition.dy;
               notifyChanged();
             }
             //For TrendLine
-            if (widget.isTrendLine && changeinXposition != null) {
-              changeinXposition = details.localPosition.dx;
-              changeinYposition = details.globalPosition.dy;
+            if (widget.isTrendLine && changeInXPosition != null) {
+              changeInXPosition = details.localPosition.dx;
+              changeInYPosition = details.globalPosition.dy;
               notifyChanged();
             }
           },
           onLongPressMoveUpdate: (details) {
-            if ((mSelectX != details.localPosition.dx ||
-                    mSelectY != details.globalPosition.dy) &&
-                !widget.isTrendLine) {
+            if ((mSelectX != details.localPosition.dx || mSelectY != details.globalPosition.dy) && !widget.isTrendLine) {
               mSelectX = details.localPosition.dx;
               mSelectY = details.localPosition.dy;
               notifyChanged();
             }
             if (widget.isTrendLine) {
-              mSelectX =
-                  mSelectX + (details.localPosition.dx - changeinXposition!);
-              changeinXposition = details.localPosition.dx;
-              mSelectY =
-                  mSelectY + (details.globalPosition.dy - changeinYposition!);
-              changeinYposition = details.globalPosition.dy;
+              mSelectX = mSelectX + (details.localPosition.dx - changeInXPosition!);
+              changeInXPosition = details.localPosition.dx;
+              mSelectY = mSelectY + (details.globalPosition.dy - changeInYPosition!);
+              changeInYPosition = details.globalPosition.dy;
               notifyChanged();
             }
           },
@@ -289,57 +259,6 @@ class _KChartWidgetState extends State<KChartWidget>
         );
       },
     );
-  }
-
-  void _stopAnimation({bool needNotify = true}) {
-    if (_controller != null && _controller!.isAnimating) {
-      _controller!.stop();
-      _onDragChanged(false);
-      if (needNotify) {
-        notifyChanged();
-      }
-    }
-  }
-
-  void _onDragChanged(bool isOnDrag) {
-    isDrag = isOnDrag;
-    if (widget.isOnDrag != null) {
-      widget.isOnDrag!(isDrag);
-    }
-  }
-
-  void _onFling(double x) {
-    _controller = AnimationController(
-        duration: Duration(milliseconds: widget.flingTime), vsync: this);
-    aniX = null;
-    aniX = Tween<double>(begin: mScrollX, end: x * widget.flingRatio + mScrollX)
-        .animate(CurvedAnimation(
-            parent: _controller!.view, curve: widget.flingCurve));
-    aniX!.addListener(() {
-      mScrollX = aniX!.value;
-      if (mScrollX <= 0) {
-        mScrollX = 0;
-        if (widget.onLoadMore != null) {
-          widget.onLoadMore!(true);
-        }
-        _stopAnimation();
-      } else if (mScrollX >= ChartPainter.maxScrollX) {
-        mScrollX = ChartPainter.maxScrollX;
-        if (widget.onLoadMore != null) {
-          widget.onLoadMore!(false);
-        }
-        _stopAnimation();
-      }
-      notifyChanged();
-    });
-    aniX!.addStatusListener((status) {
-      if (status == AnimationStatus.completed ||
-          status == AnimationStatus.dismissed) {
-        _onDragChanged(false);
-        notifyChanged();
-      }
-    });
-    _controller!.forward();
   }
 
   void notifyChanged() => setState(() {});
@@ -387,10 +306,7 @@ class _KChartWidgetState extends State<KChartWidget>
               itemExtent: 14.0,
               shrinkWrap: true,
               itemBuilder: (context, index) {
-                final translations = widget.isChinese
-                    ? kChartTranslations['zh_CN']!
-                    : widget.translations.of(context);
-
+                final translations = widget.translations.of(context);
                 return _buildItem(
                   infos[index],
                   translations.byIndex(index),
@@ -423,8 +339,5 @@ class _KChartWidgetState extends State<KChartWidget>
         : infoWidget;
   }
 
-  String getDate(int? date) => dateFormat(
-      DateTime.fromMillisecondsSinceEpoch(
-          date ?? DateTime.now().millisecondsSinceEpoch),
-      widget.timeFormat);
+  String getDate(int? date) => dateFormat(DateTime.fromMillisecondsSinceEpoch(date ?? DateTime.now().millisecondsSinceEpoch), widget.timeFormat);
 }

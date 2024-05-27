@@ -1,7 +1,7 @@
-name: k_chart
+name: flutter_k_chart
 description: A Flutter K Chart.
-version: 0.7.1
-homepage: https://github.com/mafanwei/k_chart
+version: 1.0.0
+homepage: https://github.com/fxwalletOfficial/flutter_k_chart
 
 environment:
   sdk: ">=2.12.0 <3.0.0"

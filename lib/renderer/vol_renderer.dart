@@ -1,22 +1,19 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:k_chart/flutter_k_chart.dart';
+import 'package:flutter_k_chart/flutter_k_chart.dart';
 
 class VolRenderer extends BaseChartRenderer<VolumeEntity> {
   late double mVolWidth;
   final ChartStyle chartStyle;
   final ChartColors chartColors;
 
-  VolRenderer(Rect mainRect, double maxValue, double minValue,
-      double topPadding, int fixedLength, this.chartStyle, this.chartColors)
-      : super(
-            chartRect: mainRect,
-            maxValue: maxValue,
-            minValue: minValue,
-            topPadding: topPadding,
-            fixedLength: fixedLength,
-            gridColor: chartColors.gridColor,) {
+  VolRenderer(Rect mainRect, double maxValue, double minValue, double topPadding, int fixedLength, this.chartStyle, this.chartColors) : super(
+    chartRect: mainRect,
+    maxValue: maxValue,
+    minValue: minValue,
+    topPadding: topPadding,
+    fixedLength: fixedLength,
+    gridColor: chartColors.gridColor
+    ) {
     mVolWidth = this.chartStyle.volWidth;
   }
 
@@ -28,26 +25,21 @@ class VolRenderer extends BaseChartRenderer<VolumeEntity> {
     double bottom = chartRect.bottom;
     if (curPoint.vol != 0) {
       canvas.drawRect(
-          Rect.fromLTRB(curX - r, top, curX + r, bottom),
-          chartPaint
-            ..color = curPoint.close > curPoint.open
-                ? this.chartColors.upColor
-                : this.chartColors.dnColor);
+        Rect.fromLTRB(curX - r, top, curX + r, bottom),
+        chartPaint..color = curPoint.close > curPoint.open ? this.chartColors.upColor : this.chartColors.dnColor
+      );
     }
 
     if (lastPoint.MA5Volume != 0) {
-      drawLine(lastPoint.MA5Volume, curPoint.MA5Volume, canvas, lastX, curX,
-          this.chartColors.ma5Color);
+      drawLine(lastPoint.MA5Volume, curPoint.MA5Volume, canvas, lastX, curX, this.chartColors.ma5Color);
     }
 
     if (lastPoint.MA10Volume != 0) {
-      drawLine(lastPoint.MA10Volume, curPoint.MA10Volume, canvas, lastX, curX,
-          this.chartColors.ma10Color);
+      drawLine(lastPoint.MA10Volume, curPoint.MA10Volume, canvas, lastX, curX, this.chartColors.ma10Color);
     }
   }
 
-  double getVolY(double value) =>
-      (maxValue - value) * (chartRect.height / maxValue) + chartRect.top;
+  double getVolY(double value) => (maxValue - value) * (chartRect.height / maxValue) + chartRect.top;
 
   @override
   void drawText(Canvas canvas, VolumeEntity data, double x) {

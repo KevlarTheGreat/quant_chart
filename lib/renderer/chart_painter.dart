@@ -1,16 +1,24 @@
 import 'dart:async' show StreamSink;
 
 import 'package:flutter/material.dart';
-import 'package:k_chart/utils/number_util.dart';
+import 'package:flutter_k_chart/entity/info_window_entity.dart';
+import 'package:flutter_k_chart/entity/k_line_entity.dart';
+import 'package:flutter_k_chart/renderer/base_chart_painter.dart';
+import 'package:flutter_k_chart/renderer/base_chart_renderer.dart';
+import 'package:flutter_k_chart/renderer/main_renderer.dart';
+import 'package:flutter_k_chart/renderer/secondary_renderer.dart';
+import 'package:flutter_k_chart/renderer/vol_renderer.dart';
+import 'package:flutter_k_chart/utils/date_format_util.dart';
+import 'package:flutter_k_chart/utils/number_util.dart';
 
-import '../entity/info_window_entity.dart';
-import '../entity/k_line_entity.dart';
-import '../utils/date_format_util.dart';
-import 'base_chart_painter.dart';
-import 'base_chart_renderer.dart';
-import 'main_renderer.dart';
-import 'secondary_renderer.dart';
-import 'vol_renderer.dart';
+// import '../entity/info_window_entity.dart';
+// import '../entity/k_line_entity.dart';
+// import '../utils/date_format_util.dart';
+// import 'base_chart_painter.dart';
+// import 'base_chart_renderer.dart';
+// import 'main_renderer.dart';
+// import 'secondary_renderer.dart';
+// import 'vol_renderer.dart';
 
 class TrendLine {
   final Offset p1;
@@ -30,7 +38,7 @@ double getTrendLineX() {
 class ChartPainter extends BaseChartPainter {
   final List<TrendLine> lines; //For TrendLine
   final bool isTrendLine; //For TrendLine
-  bool isrecordingCord = false; //For TrendLine
+  bool isRecordingCord = false; //For TrendLine
   final double selectY; //For TrendLine
   static get maxScrollX => BaseChartPainter.maxScrollX;
   late BaseChartRenderer mMainRenderer;
@@ -55,7 +63,7 @@ class ChartPainter extends BaseChartPainter {
     required this.lines, //For TrendLine
     required this.isTrendLine, //For TrendLine
     required this.selectY, //For TrendLine
-    required datas,
+    required data,
     required scaleX,
     required scrollX,
     required isLongPass,
@@ -74,7 +82,7 @@ class ChartPainter extends BaseChartPainter {
     this.fixedLength = 2,
     this.maDayList = const [5, 10, 20],
   }) : super(chartStyle,
-            datas: datas,
+            data: data,
             scaleX: scaleX,
             scrollX: scrollX,
             isLongPress: isLongPass,
@@ -102,8 +110,8 @@ class ChartPainter extends BaseChartPainter {
 
   @override
   void initChartRenderer() {
-    if (datas != null && datas!.isNotEmpty) {
-      var t = datas![0];
+    if (data != null && data!.isNotEmpty) {
+      var t = data![0];
       fixedLength =
           NumberUtil.getMaxDecimalLength(t.open, t.close, t.high, t.low);
     }
@@ -121,10 +129,8 @@ class ChartPainter extends BaseChartPainter {
       verticalTextAlignment,
       maDayList,
     );
-    if (mVolRect != null) {
-      mVolRenderer = VolRenderer(mVolRect!, mVolMaxValue, mVolMinValue,
-          mChildPadding, fixedLength, this.chartStyle, this.chartColors);
-    }
+    if (mVolRect != null) mVolRenderer = VolRenderer(mVolRect!, mVolMaxValue, mVolMinValue, mChildPadding, fixedLength, this.chartStyle, this.chartColors);
+
     if (mSecondaryRect != null) {
       mSecondaryRenderer = SecondaryRenderer(
           mSecondaryRect!,
@@ -184,10 +190,10 @@ class ChartPainter extends BaseChartPainter {
     canvas.save();
     canvas.translate(mTranslateX * scaleX, 0.0);
     canvas.scale(scaleX, 1.0);
-    for (int i = mStartIndex; datas != null && i <= mStopIndex; i++) {
-      KLineEntity? curPoint = datas?[i];
+    for (int i = mStartIndex; data != null && i <= mStopIndex; i++) {
+      KLineEntity? curPoint = data?[i];
       if (curPoint == null) continue;
-      KLineEntity lastPoint = i == 0 ? curPoint : datas![i - 1];
+      KLineEntity lastPoint = i == 0 ? curPoint : data![i - 1];
       double curX = getX(i);
       double lastX = i == 0 ? curX : getX(i - 1);
 
@@ -217,7 +223,7 @@ class ChartPainter extends BaseChartPainter {
 
   @override
   void drawDate(Canvas canvas, Size size) {
-    if (datas == null) return;
+    if (data == null) return;
 
     double columnSpace = size.width / mGridColumns;
     double startX = getX(mStartIndex) - mPointWidth / 2;
@@ -230,8 +236,8 @@ class ChartPainter extends BaseChartPainter {
       if (translateX >= startX && translateX <= stopX) {
         int index = indexOfTranslateX(translateX);
 
-        if (datas?[index] == null) continue;
-        TextPainter tp = getTextPainter(getDate(datas![index].time), null);
+        if (data?[index] == null) continue;
+        TextPainter tp = getTextPainter(getDate(data![index].time), null);
         y = size.height - (mBottomPadding - tp.height) / 2 - tp.height;
         x = columnSpace * i - tp.width / 2;
         // Prevent date text out of canvas
@@ -243,12 +249,12 @@ class ChartPainter extends BaseChartPainter {
 
 //    double translateX = xToTranslateX(0);
 //    if (translateX >= startX && translateX <= stopX) {
-//      TextPainter tp = getTextPainter(getDate(datas[mStartIndex].id));
+//      TextPainter tp = getTextPainter(getDate(data[mStartIndex].id));
 //      tp.paint(canvas, Offset(0, y));
 //    }
 //    translateX = xToTranslateX(size.width);
 //    if (translateX >= startX && translateX <= stopX) {
-//      TextPainter tp = getTextPainter(getDate(datas[mStopIndex].id));
+//      TextPainter tp = getTextPainter(getDate(data[mStopIndex].id));
 //      tp.paint(canvas, Offset(size.width - tp.width, y));
 //    }
   }
@@ -439,11 +445,11 @@ class ChartPainter extends BaseChartPainter {
       return;
     }
 
-    if (datas == null) {
+    if (data == null) {
       return;
     }
 
-    double value = datas!.last.close;
+    double value = data!.last.close;
     double y = getMainY(value);
 
     //视图展示区域边界值绘制
@@ -456,7 +462,7 @@ class ChartPainter extends BaseChartPainter {
     }
 
     nowPricePaint
-      ..color = value >= datas!.last.open
+      ..color = value >= data!.last.open
           ? this.chartColors.nowPriceUpColor
           : this.chartColors.nowPriceDnColor;
     //先画横线
@@ -559,26 +565,18 @@ class ChartPainter extends BaseChartPainter {
     double x = getX(index);
     double y = getMainY(point.close);
     // k线图竖线
-    canvas.drawLine(Offset(x, mTopPadding),
-        Offset(x, size.height - mBottomPadding), paintY);
+    canvas.drawLine(Offset(x, mTopPadding), Offset(x, size.height - mBottomPadding), paintY);
 
     Paint paintX = Paint()
       ..color = this.chartColors.hCrossColor
       ..strokeWidth = this.chartStyle.hCrossWidth
       ..isAntiAlias = true;
     // k线图横线
-    canvas.drawLine(Offset(-mTranslateX, y),
-        Offset(-mTranslateX + mWidth / scaleX, y), paintX);
+    canvas.drawLine(Offset(-mTranslateX, y), Offset(-mTranslateX + mWidth / scaleX, y), paintX);
     if (scaleX >= 1) {
-      canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(x, y), height: 2.0 * scaleX, width: 2.0),
-          paintX);
+      canvas.drawOval(Rect.fromCenter(center: Offset(x, y), height: 2.0 * scaleX, width: 2.0), paintX);
     } else {
-      canvas.drawOval(
-          Rect.fromCenter(
-              center: Offset(x, y), height: 2.0, width: 2.0 / scaleX),
-          paintX);
+      canvas.drawOval(Rect.fromCenter(center: Offset(x, y), height: 2.0, width: 2.0 / scaleX), paintX);
     }
   }
 
@@ -592,20 +590,13 @@ class ChartPainter extends BaseChartPainter {
     return tp;
   }
 
-  String getDate(int? date) => dateFormat(
-      DateTime.fromMillisecondsSinceEpoch(
-          date ?? DateTime.now().millisecondsSinceEpoch),
-      mFormats);
+  String getDate(int? date) => dateFormat(DateTime.fromMillisecondsSinceEpoch(date ?? DateTime.now().millisecondsSinceEpoch), mFormats);
 
   double getMainY(double y) => mMainRenderer.getY(y);
 
   /// 点是否在SecondaryRect中
-  bool isInSecondaryRect(Offset point) {
-    return mSecondaryRect?.contains(point) ?? false;
-  }
+  bool isInSecondaryRect(Offset point) => mSecondaryRect?.contains(point) ?? false;
 
   /// 点是否在MainRect中
-  bool isInMainRect(Offset point) {
-    return mMainRect.contains(point);
-  }
+  bool isInMainRect(Offset point) => mMainRect.contains(point);
 }

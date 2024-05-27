@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 import '../entity/macd_entity.dart';
@@ -68,12 +66,12 @@ class SecondaryRenderer extends BaseChartRenderer<MACDEntity> {
     final macd = curPoint.macd ?? 0;
     double macdY = getY(macd);
     double r = mMACDWidth / 2;
-    double zeroy = getY(0);
+    double zeroY = getY(0);
     if (macd > 0) {
-      canvas.drawRect(Rect.fromLTRB(curX - r, macdY, curX + r, zeroy),
+      canvas.drawRect(Rect.fromLTRB(curX - r, macdY, curX + r, zeroY),
           chartPaint..color = this.chartColors.upColor);
     } else {
-      canvas.drawRect(Rect.fromLTRB(curX - r, zeroy, curX + r, macdY),
+      canvas.drawRect(Rect.fromLTRB(curX - r, zeroY, curX + r, macdY),
           chartPaint..color = this.chartColors.dnColor);
     }
     if (lastPoint.dif != 0) {
