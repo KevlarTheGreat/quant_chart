@@ -159,7 +159,10 @@ class MainRendererColors extends RendererColors {
 
     super.up,
     super.down,
-    super.grid
+    super.grid,
+    super.ma5,
+    super.ma10,
+    super.ma30
   });
 }
 
@@ -201,7 +204,10 @@ class SecondaryRendererColors extends RendererColors {
 
     super.up,
     super.down,
-    super.grid
+    super.grid,
+    super.ma5,
+    super.ma10,
+    super.ma30
   });
 }
 
@@ -226,7 +232,10 @@ class VolumeRendererColors extends RendererColors {
 
     super.up,
     super.down,
-    super.grid
+    super.grid,
+    super.ma5,
+    super.ma10,
+    super.ma30
   });
 }
 
