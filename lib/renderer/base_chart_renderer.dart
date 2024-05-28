@@ -6,7 +6,6 @@ abstract class BaseChartRenderer<T> {
   double maxValue;
   double minValue;
   late double scaleY;
-  double topPadding;
   Rect chartRect;
   final String Function(double value)? dataFormat;
 
@@ -25,7 +24,6 @@ abstract class BaseChartRenderer<T> {
     required this.chartRect,
     required this.maxValue,
     required this.minValue,
-    required this.topPadding,
     required Color gridColor,
     this.dataFormat
   }) {

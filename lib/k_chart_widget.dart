@@ -6,21 +6,6 @@ import 'package:flutter_k_chart/chart_translations.dart';
 import 'package:flutter_k_chart/extension/map_ext.dart';
 import 'package:flutter_k_chart/flutter_k_chart.dart';
 
-enum MainState {
-  MA,
-  BOLL,
-  NONE
-}
-
-enum SecondaryState {
-  MACD,
-  KDJ,
-  RSI,
-  WR,
-  CCI,
-  NONE
-}
-
 class TimeFormat {
   static const List<String> YEAR_MONTH_DAY = [yyyy, '-', mm, '-', dd];
   static const List<String> YEAR_MONTH_DAY_WITH_HOUR = [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn];
@@ -37,11 +22,10 @@ class KChartWidget extends StatefulWidget {
   final bool hideGrid;
   final bool showNowPrice;
   final bool showInfoDialog;
-  final bool materialInfoDialog; // Material风格的信息弹窗
   final Map<String, ChartTranslations> translations;
   final List<String> timeFormat;
 
-  //当屏幕滚动到尽头会调用，真为拉到屏幕右侧尽头，假为拉到屏幕左侧尽头
+  /// 当屏幕滚动到尽头会调用，真为拉到屏幕右侧尽头，假为拉到屏幕左侧尽头
   final Function(bool)? onLoadMore;
 
   final List<int> maDayList;
@@ -49,42 +33,35 @@ class KChartWidget extends StatefulWidget {
   final double flingRatio;
   final Curve flingCurve;
   final Function(bool)? isOnDrag;
-  final ChartColors chartColors;
-  final ChartStyle chartStyle;
-  final VerticalTextAlignment verticalTextAlignment;
+  final ChartStyle style;
   final bool isTrendLine;
   final double xFrontPadding;
   final String Function(double value)? dataFormat;
 
-  KChartWidget(
-    this.data,
-    this.chartStyle,
-    this.chartColors,
-    {
-      required this.isTrendLine,
-      this.xFrontPadding = 100,
-      this.mainState = MainState.MA,
-      this.secondaryState = SecondaryState.MACD,
-      this.onSecondaryTap,
-      this.volHidden = false,
-      this.isLine = false,
-      this.isTapShowInfoDialog = false,
-      this.hideGrid = false,
-      this.showNowPrice = true,
-      this.showInfoDialog = true,
-      this.materialInfoDialog = true,
-      this.translations = kChartTranslations,
-      this.timeFormat = TimeFormat.YEAR_MONTH_DAY,
-      this.onLoadMore,
-      this.maDayList = const [5, 10, 20],
-      this.flingTime = 600,
-      this.flingRatio = 0.5,
-      this.flingCurve = Curves.decelerate,
-      this.isOnDrag,
-      this.verticalTextAlignment = VerticalTextAlignment.left,
-      this.dataFormat
-    }
-  );
+  KChartWidget({
+    required this.data,
+    required this.style,
+    required this.isTrendLine,
+    this.xFrontPadding = 100,
+    this.mainState = MainState.MA,
+    this.secondaryState = SecondaryState.MACD,
+    this.onSecondaryTap,
+    this.volHidden = false,
+    this.isLine = false,
+    this.isTapShowInfoDialog = false,
+    this.hideGrid = false,
+    this.showNowPrice = true,
+    this.showInfoDialog = true,
+    this.translations = kChartTranslations,
+    this.timeFormat = TimeFormat.YEAR_MONTH_DAY,
+    this.onLoadMore,
+    this.maDayList = const [5, 10, 20],
+    this.flingTime = 600,
+    this.flingRatio = 0.5,
+    this.flingCurve = Curves.decelerate,
+    this.isOnDrag,
+    this.dataFormat
+  });
 
   @override
   _KChartWidgetState createState() => _KChartWidgetState();
@@ -134,8 +111,7 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
     }
 
     final _painter = ChartPainter(
-      style: widget.chartStyle,
-      colors: widget.chartColors,
+      style: widget.style,
       lines: lines, //For TrendLine
       xFrontPadding: widget.xFrontPadding,
       isTrendLine: widget.isTrendLine, //For TrendLine
@@ -155,7 +131,6 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
       showNowPrice: widget.showNowPrice,
       sink: mInfoWindowStream?.sink,
       maDayList: widget.maDayList,
-      verticalTextAlignment: widget.verticalTextAlignment,
       dataFormat: widget.dataFormat
     );
 
@@ -179,7 +154,7 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
             }
             if (widget.isTrendLine && !isLongPress && enableCordRecord) {
               enableCordRecord = false;
-              Offset p1 = Offset(getTrendLineX(), mSelectY);
+              Offset p1 = Offset(trendLineX, mSelectY);
               if (!waitingForOtherPairOfCords) lines.add(TrendLine(p1, Offset(-1, -1), trendLineMax!, trendLineScale!));
 
               if (waitingForOtherPairOfCords) {
@@ -195,34 +170,15 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
           onScaleUpdate: (details) {
             if (isLongPress) return;
             mScaleX = (_lastScale * details.scale).clamp(0.5, 2.2);
-            mScrollX = (details.focalPointDelta.dx / mScaleX + mScrollX).clamp(0.0, ChartPainter.maxScrollX).toDouble();
+            mScrollX = (details.focalPointDelta.dx / mScaleX + mScrollX).clamp(0.0, ChartPainter.maxScrollX + widget.xFrontPadding).toDouble();
             notifyChanged();
           },
-          onScaleEnd: (_) {
+          onScaleEnd: (details) {
             _lastScale = mScaleX;
+            var velocity = details.velocity.pixelsPerSecond.dx;
+            _onFling(velocity);
           },
-          onLongPressStart: (details) {
-            isOnTap = false;
-            isLongPress = true;
-            if ((mSelectX != details.localPosition.dx ||
-                    mSelectY != details.globalPosition.dy) &&
-                !widget.isTrendLine) {
-              mSelectX = details.localPosition.dx;
-              notifyChanged();
-            }
-            //For TrendLine
-            if (widget.isTrendLine && changeInXPosition == null) {
-              mSelectX = changeInXPosition = details.localPosition.dx;
-              mSelectY = changeInYPosition = details.globalPosition.dy;
-              notifyChanged();
-            }
-            //For TrendLine
-            if (widget.isTrendLine && changeInXPosition != null) {
-              changeInXPosition = details.localPosition.dx;
-              changeInYPosition = details.globalPosition.dy;
-              notifyChanged();
-            }
-          },
+          onLongPressStart: _onLongPressStart,
           onLongPressMoveUpdate: (details) {
             if ((mSelectX != details.localPosition.dx || mSelectY != details.globalPosition.dy) && !widget.isTrendLine) {
               mSelectX = details.localPosition.dx;
@@ -283,20 +239,19 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
         final dialogWidth = mWidth / 3;
         return Container(
           margin: EdgeInsets.only(left: snapshot.data!.isLeft ? dialogPadding : mWidth - dialogWidth - dialogPadding, top: 25),
+          padding: widget.style.select.padding,
           width: dialogWidth,
           decoration: BoxDecoration(
-            color: widget.chartColors.selectFillColor,
-            border: Border.all(color: widget.chartColors.selectBorderColor, width: 0.5)
+            color: widget.style.select.colors.fill,
+            border: Border.all(color: widget.style.select.colors.border, width: 0.5),
+            borderRadius: widget.style.select.radius
           ),
           child: ListView.builder(
             padding: EdgeInsets.all(dialogPadding),
             itemCount: infos.length,
             itemExtent: 14.0,
             shrinkWrap: true,
-            itemBuilder: (context, index) {
-              final translations = widget.translations.of(context);
-              return _buildItem(infos[index], translations.byIndex(index));
-            }
+            itemBuilder: (c, i) => _buildItem(infos[i], widget.translations.of(c).byIndex(i))
           )
         );
       }
@@ -304,22 +259,23 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
   }
 
   Widget _buildItem(String info, String infoName) {
-    final infoWidget = Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(child: Text(infoName, style: TextStyle(color: widget.chartColors.infoWindowTitleColor, fontSize: 10.0))),
-        Text(info, style: TextStyle(color: _getItemColor(info), fontSize: 10.0))
-      ]
+    return Material(
+      color: Colors.transparent,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(child: Text(infoName, style: TextStyle(color: widget.style.select.colors.text, fontSize: 10.0))),
+          Text(info, style: TextStyle(color: _getItemColor(info), fontSize: 10.0))
+        ]
+      )
     );
-
-    return widget.materialInfoDialog ? Material(color: Colors.transparent, child: infoWidget) : infoWidget;
   }
 
   Color _getItemColor(String info) {
-    if (info.startsWith('+')) return widget.chartColors.infoWindowUpColor;
-    if (info.startsWith('-')) return widget.chartColors.infoWindowDnColor;
-    return widget.chartColors.infoWindowNormalColor;
+    if (info.startsWith('+')) return widget.style.select.colors.upText;
+    if (info.startsWith('-')) return widget.style.select.colors.downText;
+    return widget.style.select.colors.text;
   }
 
   String getDate(int? date) => dateFormat(DateTime.fromMillisecondsSinceEpoch(date ?? DateTime.now().millisecondsSinceEpoch), widget.timeFormat);
@@ -335,4 +291,78 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
     final t = widget.data!.first;
     return NumberUtil.getMaxDecimalLength(t.open, t.close, t.high, t.low);
   }
+
+
+  void _onFling(double x) {
+    _controller = AnimationController(duration: Duration(milliseconds: widget.flingTime), vsync: this);
+    aniX = null;
+    aniX = Tween<double>(begin: mScrollX, end: x * widget.flingRatio + mScrollX).animate(CurvedAnimation(parent: _controller!.view, curve: widget.flingCurve));
+    aniX!.addListener(() {
+      mScrollX = aniX!.value;
+      if (mScrollX <= 0) {
+        mScrollX = 0;
+        _onLoadMore(true);
+        _stopAnimation();
+        notifyChanged();
+        return;
+      }
+
+      if (mScrollX >= ChartPainter.maxScrollX - widget.xFrontPadding) _onLoadMore(false);
+      if (mScrollX >= ChartPainter.maxScrollX + widget.xFrontPadding) mScrollX = ChartPainter.maxScrollX + widget.xFrontPadding;
+
+      _stopAnimation();
+      notifyChanged();
+    });
+
+    _controller!.forward();
+  }
+
+  void _onLoadMore(bool status) {
+    if (widget.onLoadMore == null) return;
+    widget.onLoadMore!(status);
+  }
+
+  void _stopAnimation({bool needNotify = true}) {
+    if (_controller != null && _controller!.isAnimating) {
+      _controller!.stop();
+      if (needNotify) notifyChanged();
+    }
+  }
+
+  void _onLongPressStart(LongPressStartDetails details) {
+    isOnTap = false;
+    isLongPress = true;
+    if ((mSelectX != details.localPosition.dx || mSelectY != details.globalPosition.dy) && !widget.isTrendLine) {
+      mSelectX = details.localPosition.dx;
+      notifyChanged();
+    }
+    //For TrendLine
+    if (widget.isTrendLine && changeInXPosition == null) {
+      mSelectX = changeInXPosition = details.localPosition.dx;
+      mSelectY = changeInYPosition = details.globalPosition.dy;
+      notifyChanged();
+    }
+    //For TrendLine
+    if (widget.isTrendLine && changeInXPosition != null) {
+      changeInXPosition = details.localPosition.dx;
+      changeInYPosition = details.globalPosition.dy;
+      notifyChanged();
+    }
+  }
 }
+
+enum MainState {
+  MA,
+  BOLL,
+  NONE
+}
+
+enum SecondaryState {
+  MACD,
+  KDJ,
+  RSI,
+  WR,
+  CCI,
+  NONE
+}
+

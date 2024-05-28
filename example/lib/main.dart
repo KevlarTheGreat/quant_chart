@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_k_chart/chart_translations.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:flutter_k_chart/chart_translations.dart';
 import 'package:flutter_k_chart/flutter_k_chart.dart';
 
 void main() => runApp(const MyApp());
@@ -44,11 +44,8 @@ class MyHomePageState extends State<MyHomePage> {
   List<DepthEntity>? _bids, _asks;
   bool isChangeUI = false;
   bool _isTrendLine = false;
-  bool _priceLeft = true;
-  VerticalTextAlignment _verticalTextAlignment = VerticalTextAlignment.left;
 
   ChartStyle chartStyle = ChartStyle();
-  ChartColors chartColors = ChartColors();
 
   @override
   void initState() {
@@ -105,9 +102,8 @@ class MyHomePageState extends State<MyHomePage> {
             height: 450,
             width: double.infinity,
             child: KChartWidget(
-              data,
-              chartStyle,
-              chartColors,
+              data: data,
+              style: chartStyle,
               isLine: isLine,
               isTrendLine: _isTrendLine,
               mainState: _mainState,
@@ -118,7 +114,6 @@ class MyHomePageState extends State<MyHomePage> {
               showNowPrice: _showNowPrice,
               hideGrid: _hideGrid,
               isTapShowInfoDialog: false,
-              verticalTextAlignment: _verticalTextAlignment,
               maDayList: const [1, 100, 1000]
             )
           ),
@@ -133,7 +128,7 @@ class MyHomePageState extends State<MyHomePage> {
         if (_bids != null && _asks != null) SizedBox(
           height: 230,
           width: double.infinity,
-          child: DepthChart(_bids!, _asks!, chartColors)
+          child: DepthChart(bids: _bids!, asks: _asks!, colors: const DepthColors())
         )
       ]
     );
@@ -159,24 +154,6 @@ class MyHomePageState extends State<MyHomePage> {
         button("Change Language", onPressed: () => isChinese = !isChinese),
         button(_hideGrid ? "Show Grid" : "Hide Grid", onPressed: () => _hideGrid = !_hideGrid),
         button(_showNowPrice ? "Hide Now Price" : "Show Now Price", onPressed: () => _showNowPrice = !_showNowPrice),
-        button("Customize UI", onPressed: () => setState(() {
-          isChangeUI = !isChangeUI;
-          if (isChangeUI) {
-            chartColors.selectBorderColor = Colors.red;
-            chartColors.selectFillColor = Colors.red;
-            chartColors.lineFillColor = Colors.red;
-            chartColors.kLineColor = Colors.yellow;
-          } else {
-            chartColors.selectBorderColor = const Color(0xff6C7A86);
-            chartColors.selectFillColor = const Color(0xff0D1722);
-            chartColors.lineFillColor = const Color(0x554C86CD);
-            chartColors.kLineColor = const Color(0xff4C86CD);
-          }
-        })),
-        button("Change PriceTextPaint", onPressed: () => setState(() {
-          _priceLeft = !_priceLeft;
-          _verticalTextAlignment = _priceLeft ? VerticalTextAlignment.left : VerticalTextAlignment.right;
-        }))
       ]
     );
   }

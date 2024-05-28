@@ -1,6 +1,6 @@
-export 'base_chart_painter.dart';
-export 'base_chart_renderer.dart';
-export 'chart_painter.dart';
-export 'main_renderer.dart';
-export 'secondary_renderer.dart';
-export 'vol_renderer.dart';
+export 'package:flutter_k_chart/renderer/base_chart_painter.dart';
+export 'package:flutter_k_chart/renderer/base_chart_renderer.dart';
+export 'package:flutter_k_chart/renderer/chart_painter.dart';
+export 'package:flutter_k_chart/renderer/main_renderer.dart';
+export 'package:flutter_k_chart/renderer/secondary_renderer.dart';
+export 'package:flutter_k_chart/renderer/vol_renderer.dart';
