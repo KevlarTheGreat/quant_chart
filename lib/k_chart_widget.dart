@@ -141,6 +141,13 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
 
         return GestureDetector(
           onTapUp: (details) {
+            if (isLongPress || (isOnTap && widget.isTapShowInfoDialog)) {
+              isOnTap = false;
+              isLongPress = false;
+              notifyChanged();
+              return;
+            }
+
             if (!widget.isTrendLine && widget.onSecondaryTap != null && _painter.isInSecondaryRect(details.localPosition)) {
               widget.onSecondaryTap!();
             }
@@ -194,6 +201,8 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
             }
           },
           onLongPressEnd: (details) {
+            if (widget.isTapShowInfoDialog) return;
+
             isLongPress = false;
             enableCordRecord = true;
             mInfoWindowStream?.sink.add(null);
