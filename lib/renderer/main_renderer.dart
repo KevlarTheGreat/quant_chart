@@ -10,6 +10,7 @@ double? trendLineScale;
 double? trendLineContentRec;
 
 class MainRenderer extends BaseChartRenderer<CandleEntity> {
+  final MainRendererStyle style;
   final MainState state;
   final bool isLine;
 
@@ -17,29 +18,22 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
   late Rect _contentRect;
   double _contentPadding = 5.0;
   List<int> maDayList;
-  final MainRendererStyle style;
+
   final double mLineStrokeWidth = 1.0;
   double scaleX;
   late Paint mLinePaint;
-  final String Function(double value)? dataFormat;
 
   MainRenderer({
-    required Rect mainRect,
-    required double maxValue,
-    required double minValue,
+    required this.style,
+    required super.chartRect,
+    required super.maxValue,
+    required super.minValue,
     this.state = MainState.NONE,
     this.isLine = false,
-    required this.style,
     required this.scaleX,
     this.maDayList = const [5, 10, 20],
-    this.dataFormat
-  }) : super(
-    chartRect: mainRect,
-    maxValue: maxValue,
-    minValue: minValue,
-    gridColor: style.colors.grid,
-    dataFormat: dataFormat
-  ) {
+    super.dataFormat
+  }) : super(style: style) {
     mLinePaint = Paint()
       ..isAntiAlias = true
       ..style = PaintingStyle.stroke

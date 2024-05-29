@@ -7,22 +7,15 @@ import 'base_chart_renderer.dart';
 class SecondaryRenderer extends BaseChartRenderer<MACDEntity> {
   final SecondaryState state;
   final SecondaryRendererStyle style;
-  final String Function(double value)? dataFormat;
 
   SecondaryRenderer({
-    required Rect rect,
-    required double maxValue,
-    required double minValue,
+    required super.chartRect,
+    required super.maxValue,
+    required super.minValue,
     required this.state,
     required this.style,
-    this.dataFormat
-  }) : super(
-    chartRect: rect,
-    maxValue: maxValue,
-    minValue: minValue,
-    gridColor: style.colors.grid,
-    dataFormat: dataFormat
-  );
+    super.dataFormat
+  }) : super(style: style);
 
   @override
   void drawChart(MACDEntity lastPoint, MACDEntity curPoint, double lastX, double curX, Size size, Canvas canvas) {

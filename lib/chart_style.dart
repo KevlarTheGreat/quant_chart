@@ -74,6 +74,9 @@ class ChartStyle {
   //现在价格的线条粗细
   double nowPriceLineWidth;
 
+  /// Chart number data text font size.
+  final double dataFontSize;
+
   int gridRows;
 
   int gridColumns;
@@ -100,6 +103,7 @@ class ChartStyle {
     this.gridRows = 4,
     this.gridColumns = 4,
     this.dateTimeFormat,
+    this.dataFontSize = 10,
     this.main = const MainRendererStyle(),
     this.secondary = const SecondaryRendererStyle(),
     this.volume = const VolumeRendererStyle(),
@@ -110,10 +114,12 @@ class ChartStyle {
 }
 
 class RendererStyle {
+  final double fontSize;
   final EdgeInsets padding;
   final RendererColors colors;
 
   const RendererStyle({
+    this.fontSize = 10,
     this.padding = const EdgeInsets.only(left: 5, right: 5),
     this.colors = const RendererColors()
   });
@@ -140,11 +146,10 @@ class MainRendererStyle extends RendererStyle {
     this.candleWidth = 8.5,
     this.candleLineWidth = 1.5,
     this.yAxisAlignment = VerticalTextAlignment.left,
-    this.colors = const MainRendererColors()
-  }) : super(
-    padding: const EdgeInsets.only(left: 5, right: 5, top: 30, bottom: 20),
-    colors: colors
-  );
+    this.colors = const MainRendererColors(),
+    super.fontSize = 10,
+    super.padding = const EdgeInsets.only(left: 5, right: 5, top: 30, bottom: 20)
+  }) : super(colors: colors);
 }
 
 class MainRendererColors extends RendererColors {
@@ -173,11 +178,10 @@ class SecondaryRendererStyle extends RendererStyle {
 
   const SecondaryRendererStyle({
     this.macdWidth = 3.0,
-    this.colors = const SecondaryRendererColors()
-  }) : super(
-    colors: colors,
-    padding: const EdgeInsets.only(left: 5, right: 5, top: 12)
-  );
+    this.colors = const SecondaryRendererColors(),
+    super.padding = const EdgeInsets.only(left: 5, right: 5, top: 12),
+    super.fontSize = 10
+  }) : super(colors: colors);
 }
 
 class SecondaryRendererColors extends RendererColors {
@@ -217,11 +221,10 @@ class VolumeRendererStyle extends RendererStyle {
 
   const VolumeRendererStyle({
     this.width = 8.5,
-    this.colors = const VolumeRendererColors()
-  }) : super(
-    colors: colors,
-    padding: const EdgeInsets.only(left: 5, right: 5, top: 12)
-  );
+    this.colors = const VolumeRendererColors(),
+    super.padding = const EdgeInsets.only(left: 5, right: 5, top: 12),
+    super.fontSize = 10
+  }) : super(colors: colors);
 }
 
 class VolumeRendererColors extends RendererColors {
@@ -254,13 +257,31 @@ class DepthColors {
 }
 
 class ChartSelectStyle {
+  /// Container border radius.
   final BorderRadius radius;
+
+  /// Container padding.
   final EdgeInsets padding;
+
+  /// Selected info container margin.
+  /// - **Be careful！** It will auto show on right/left, so only left value will be used.
+  /// - And also, bottom will never used.
+  final EdgeInsets margin;
+
+  /// Font size of every text in container.
+  final double fontSize;
+
+  /// Container width. If not set, will use screen width / 3.
+  final double? width;
+
   final ChartSelectColors colors;
 
   const ChartSelectStyle({
     this.radius = BorderRadius.zero,
-    this.padding = EdgeInsets.zero,
+    this.padding = const EdgeInsets.all(4),
+    this.margin = const EdgeInsets.only(top: 25, left: 4),
+    this.fontSize = 10,
+    this.width,
     this.colors = const ChartSelectColors()
   });
 }

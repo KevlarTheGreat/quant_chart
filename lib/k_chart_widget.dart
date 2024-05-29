@@ -16,7 +16,6 @@ class KChartWidget extends StatefulWidget {
   final MainState mainState;
   final bool volHidden;
   final SecondaryState secondaryState;
-  final Function()? onSecondaryTap;
   final bool isLine;
   final bool isTapShowInfoDialog; //是否开启单击显示详情数据
   final bool hideGrid;
@@ -45,7 +44,6 @@ class KChartWidget extends StatefulWidget {
     this.xFrontPadding = 100,
     this.mainState = MainState.MA,
     this.secondaryState = SecondaryState.MACD,
-    this.onSecondaryTap,
     this.volHidden = false,
     this.isLine = false,
     this.isTapShowInfoDialog = false,
@@ -90,6 +88,8 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
   bool isLongPress = false;
   bool isOnTap = false;
 
+  ChartStyle get _style => widget.style;
+
   @override
   void initState() {
     super.initState();
@@ -111,7 +111,7 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
     }
 
     final _painter = ChartPainter(
-      style: widget.style,
+      style: _style,
       lines: lines, //For TrendLine
       xFrontPadding: widget.xFrontPadding,
       isTrendLine: widget.isTrendLine, //For TrendLine
@@ -146,10 +146,6 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
               isLongPress = false;
               notifyChanged();
               return;
-            }
-
-            if (!widget.isTrendLine && widget.onSecondaryTap != null && _painter.isInSecondaryRect(details.localPosition)) {
-              widget.onSecondaryTap!();
             }
 
             if (!widget.isTrendLine && _painter.isInMainRect(details.localPosition)) {
@@ -221,20 +217,20 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
 
   void notifyChanged() => setState(() {});
 
-  late List<String> infos;
-
   Widget _buildInfoDialog() {
     return StreamBuilder<InfoWindowEntity?>(
       stream: mInfoWindowStream?.stream,
-      builder: (context, snapshot) {
-        if ((!isLongPress && !isOnTap) || widget.isLine == true || !snapshot.hasData || snapshot.data?.kLineEntity == null) return Container();
+      builder: (_, snapshot) {
+        if ((!isOnTap && !isLongPress) || widget.isLine) return SizedBox.shrink();
+        if (!snapshot.hasData || snapshot.data?.kLineEntity == null) return SizedBox.shrink();
+        if (snapshot.data!.isShow && !isLongPress) return SizedBox.shrink();
 
         final entity = snapshot.data!.kLineEntity;
         final upDown = entity.change ?? entity.close - entity.open;
         final upDownPercent = entity.ratio ?? (upDown / entity.open) * 100;
         final entityAmount = entity.amount;
 
-        infos = [
+        final infos = [
           getDate(entity.time),
           format(entity.open),
           format(entity.high),
@@ -244,19 +240,20 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
           '${upDownPercent > 0 ? '+' : ''}${upDownPercent.toStringAsFixed(2)}%',
           if (entityAmount != null) entityAmount.toInt().toString()
         ];
-        final dialogPadding = 4.0;
-        final dialogWidth = mWidth / 3;
+        final edge = _style.select.margin.left;
+        final width = _style.select.width ?? mWidth / 3;
+
+        snapshot.data!.show();
         return Container(
-          margin: EdgeInsets.only(left: snapshot.data!.isLeft ? dialogPadding : mWidth - dialogWidth - dialogPadding, top: 25),
-          padding: widget.style.select.padding,
-          width: dialogWidth,
+          margin:  EdgeInsets.only(left: snapshot.data!.isLeft ? edge : mWidth - width - edge, top: _style.select.margin.top),
+          padding: _style.select.padding,
+          width: width,
           decoration: BoxDecoration(
-            color: widget.style.select.colors.fill,
-            border: Border.all(color: widget.style.select.colors.border, width: 0.5),
-            borderRadius: widget.style.select.radius
+            color: _style.select.colors.fill,
+            border: Border.all(color: _style.select.colors.border, width: 0.5),
+            borderRadius: _style.select.radius
           ),
           child: ListView.builder(
-            padding: EdgeInsets.all(dialogPadding),
             itemCount: infos.length,
             itemExtent: 14.0,
             shrinkWrap: true,
@@ -274,17 +271,17 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(child: Text(infoName, style: TextStyle(color: widget.style.select.colors.text, fontSize: 10.0))),
-          Text(info, style: TextStyle(color: _getItemColor(info), fontSize: 10.0))
+          Expanded(child: Text(infoName, style: TextStyle(color: _style.select.colors.text, fontSize: _style.select.fontSize))),
+          Text(info, style: TextStyle(color: _getItemColor(info), fontSize: _style.select.fontSize))
         ]
       )
     );
   }
 
   Color _getItemColor(String info) {
-    if (info.startsWith('+')) return widget.style.select.colors.upText;
-    if (info.startsWith('-')) return widget.style.select.colors.downText;
-    return widget.style.select.colors.text;
+    if (info.startsWith('+')) return _style.select.colors.upText;
+    if (info.startsWith('-')) return _style.select.colors.downText;
+    return _style.select.colors.text;
   }
 
   String getDate(int? date) => dateFormat(DateTime.fromMillisecondsSinceEpoch(date ?? DateTime.now().millisecondsSinceEpoch), widget.timeFormat);
@@ -374,4 +371,3 @@ enum SecondaryState {
   CCI,
   NONE
 }
-

@@ -96,7 +96,7 @@ class ChartPainter extends BaseChartPainter {
   @override
   void initChartRenderer() {
     mMainRenderer = MainRenderer(
-      mainRect: mMainRect,
+      chartRect: mMainRect,
       maxValue: mMainMaxValue,
       minValue: mMainMinValue,
       state: mainState,
@@ -107,7 +107,7 @@ class ChartPainter extends BaseChartPainter {
       dataFormat: dataFormat
     );
     if (mVolRect != null) mVolRenderer = VolRenderer(
-      rect: mVolRect!,
+      chartRect: mVolRect!,
       maxValue: mVolMaxValue,
       minValue: mVolMinValue,
       style: style.volume,
@@ -116,7 +116,7 @@ class ChartPainter extends BaseChartPainter {
 
     if (mSecondaryRect != null) {
       mSecondaryRenderer = SecondaryRenderer(
-        rect: mSecondaryRect!,
+        chartRect: mSecondaryRect!,
         maxValue: mSecondaryMaxValue,
         minValue: mSecondaryMinValue,
         state: secondaryState,
@@ -232,6 +232,7 @@ class ChartPainter extends BaseChartPainter {
     double y = getMainY(point.close);
     double x;
     bool isLeft = false;
+    print('xxxx index $index');
     if (translateXtoX(getX(index)) < mWidth / 2) {
       isLeft = false;
       x = 1;
@@ -308,7 +309,7 @@ class ChartPainter extends BaseChartPainter {
     double y = getMainY(mMainLowMinValue);
     if (x < mWidth / 2) {
       //画右边
-      final tp = getTextPainter(format(mMainLowMinValue), style.colors.minColor);
+      final tp = getTextPainter('xxx', style.colors.minColor);
       canvas.drawLine(Offset(x, y), Offset(x + lineSize, y), linePaint);
       tp.paint(canvas, Offset(x + lineSize + lineToTextOffset, y - tp.height / 2));
     } else {
@@ -449,8 +450,10 @@ class ChartPainter extends BaseChartPainter {
   TextPainter getTextPainter(text, color) {
     if (color == null) color = style.colors.defaultText;
 
-    TextSpan span = TextSpan(text: "$text", style: getTextStyle(color));
-    TextPainter tp = TextPainter(text: span, textDirection: TextDirection.ltr);
+    final tp = TextPainter(
+      text: TextSpan(text: "$text", style: getTextStyle(color)),
+      textDirection: TextDirection.ltr
+    );
     tp.layout();
     return tp;
   }

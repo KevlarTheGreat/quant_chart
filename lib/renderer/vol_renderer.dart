@@ -3,21 +3,14 @@ import 'package:flutter_k_chart/flutter_k_chart.dart';
 
 class VolRenderer extends BaseChartRenderer<VolumeEntity> {
   final VolumeRendererStyle style;
-  final String Function(double value)? dataFormat;
 
   VolRenderer({
-    required Rect rect,
-    required double maxValue,
-    required double minValue,
+    required super.chartRect,
+    required super.maxValue,
+    required super.minValue,
     required this.style,
-    this.dataFormat
-  }) : super(
-    chartRect: rect,
-    maxValue: maxValue,
-    minValue: minValue,
-    dataFormat: dataFormat,
-    gridColor: style.colors.grid
-  );
+    super.dataFormat
+  }) : super(style: style);
 
   @override
   void drawChart(VolumeEntity lastPoint, VolumeEntity curPoint, double lastX, double curX, Size size, Canvas canvas) {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_k_chart/renderer/index.dart';
 
 export '../chart_style.dart';
 
 abstract class BaseChartRenderer<T> {
+  final RendererStyle style;
   double maxValue;
   double minValue;
   late double scaleY;
@@ -21,10 +23,10 @@ abstract class BaseChartRenderer<T> {
     ..color = Color(0xff4c5c74);
 
   BaseChartRenderer({
+    required this.style,
     required this.chartRect,
     required this.maxValue,
     required this.minValue,
-    required Color gridColor,
     this.dataFormat
   }) {
     if (maxValue == minValue) {
@@ -32,7 +34,7 @@ abstract class BaseChartRenderer<T> {
       minValue /= 2;
     }
     scaleY = chartRect.height / (maxValue - minValue);
-    gridPaint.color = gridColor;
+    gridPaint.color = style.colors.grid;
   }
 
   double getY(double y) => (maxValue - y) * scaleY + chartRect.top;
@@ -60,7 +62,5 @@ abstract class BaseChartRenderer<T> {
     canvas.drawLine(Offset(lastX, lastY), Offset(curX, curY), chartPaint..color = color);
   }
 
-  TextStyle getTextStyle(Color color) {
-    return TextStyle(fontSize: 10.0, color: color);
-  }
+  TextStyle getTextStyle(Color color) => TextStyle(fontSize: style.fontSize, color: color);
 }
