@@ -232,7 +232,6 @@ class ChartPainter extends BaseChartPainter {
     double y = getMainY(point.close);
     double x;
     bool isLeft = false;
-    print('xxxx index $index');
     if (translateXtoX(getX(index)) < mWidth / 2) {
       isLeft = false;
       x = 1;
@@ -309,7 +308,7 @@ class ChartPainter extends BaseChartPainter {
     double y = getMainY(mMainLowMinValue);
     if (x < mWidth / 2) {
       //画右边
-      final tp = getTextPainter('xxx', style.colors.minColor);
+      final tp = getTextPainter(mMainLowMinValue, style.colors.minColor);
       canvas.drawLine(Offset(x, y), Offset(x + lineSize, y), linePaint);
       tp.paint(canvas, Offset(x + lineSize + lineToTextOffset, y - tp.height / 2));
     } else {
