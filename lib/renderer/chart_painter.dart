@@ -440,9 +440,9 @@ class ChartPainter extends BaseChartPainter {
     } else {
       double startY = style.main.padding.top;
       final maxY = size.height - style.main.padding.bottom;
-      final spaceY = 5 + 5;
+      final spaceY = yStyle.length + yStyle.span;
       while (startY < maxY) {
-        canvas.drawLine(Offset(x, startY), Offset(x, startY + 5), paintY);
+        canvas.drawLine(Offset(x, startY), Offset(x, startY + yStyle.length), paintY);
         startY  += spaceY;
       }
     }
@@ -459,9 +459,9 @@ class ChartPainter extends BaseChartPainter {
     } else {
       double startX = 0;
       final maxX = -mTranslateX + mWidth;
-      final spaceX = 5 + 5;
+      final spaceX = xStyle.length + xStyle.span;
       while (startX < maxX) {
-        canvas.drawLine(Offset(startX, y), Offset(startX + 5, y), paintX);
+        canvas.drawLine(Offset(startX, y), Offset(startX + xStyle.length, y), paintX);
         startX += spaceX;
       }
     }
