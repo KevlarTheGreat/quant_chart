@@ -219,10 +219,10 @@ class ChartPainter extends BaseChartPainter {
 
   @override
   void drawCrossLineText(Canvas canvas, Size size) {
-    var index = calculateSelectedX(selectX);
-    KLineEntity point = getItem(index);
+    final index = calculateSelectedX(selectX);
+    final point = getItem(index);
 
-    TextPainter tp = getTextPainter(point.close, style.select.colors.text);
+    final tp = getTextPainter(format(point.close), style.select.colors.text);
     double textHeight = tp.height;
     double textWidth = tp.width;
 
