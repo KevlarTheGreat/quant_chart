@@ -308,7 +308,7 @@ class ChartPainter extends BaseChartPainter {
     double y = getMainY(mMainLowMinValue);
     if (x < mWidth / 2) {
       //画右边
-      final tp = getTextPainter(mMainLowMinValue, style.colors.minColor);
+      final tp = getTextPainter(format(mMainLowMinValue), style.colors.minColor);
       canvas.drawLine(Offset(x, y), Offset(x + lineSize, y), linePaint);
       tp.paint(canvas, Offset(x + lineSize + lineToTextOffset, y - tp.height / 2));
     } else {
@@ -423,27 +423,56 @@ class ChartPainter extends BaseChartPainter {
   /// 画交叉线
   void drawCrossLine(Canvas canvas, Size size) {
     final index = calculateSelectedX(selectX);
-    KLineEntity point = getItem(index);
-    Paint paintY = Paint()
-      ..color = style.colors.vCross
-      ..strokeWidth = style.vCrossWidth
-      ..isAntiAlias = true;
-    double x = getX(index);
-    double y = getMainY(point.close);
-    // k线图竖线
-    canvas.drawLine(Offset(x, style.main.padding.top), Offset(x, size.height - style.main.padding.bottom), paintY);
+    final point = getItem(index);
+    final x = getX(index);
+    final y = getMainY(point.close);
 
-    Paint paintX = Paint()
-      ..color = style.colors.hCross
-      ..strokeWidth = style.hCrossWidth
+    // Draw y line.
+    final yStyle = style.select.y;
+    final paintY = Paint()
+      ..color = yStyle.color
+      ..strokeWidth = yStyle.width
       ..isAntiAlias = true;
-    // k线图横线
-    canvas.drawLine(Offset(-mTranslateX, y), Offset(-mTranslateX + mWidth / scaleX, y), paintX);
-    if (scaleX >= 1) {
-      canvas.drawOval(Rect.fromCenter(center: Offset(x, y), height: 2.0 * scaleX, width: 2.0), paintX);
+
+
+    if (yStyle.length <= 0 || yStyle.span <= 0) {
+      canvas.drawLine(Offset(x, style.main.padding.top), Offset(x, size.height - style.main.padding.bottom), paintY);
     } else {
-      canvas.drawOval(Rect.fromCenter(center: Offset(x, y), height: 2.0, width: 2.0 / scaleX), paintX);
+      double startY = style.main.padding.top;
+      final maxY = size.height - style.main.padding.bottom;
+      final spaceY = 5 + 5;
+      while (startY < maxY) {
+        canvas.drawLine(Offset(x, startY), Offset(x, startY + 5), paintY);
+        startY  += spaceY;
+      }
     }
+
+    // Draw x line.
+    final xStyle = style.select.x;
+    final paintX = Paint()
+      ..color = xStyle.color
+      ..strokeWidth = xStyle.width
+      ..isAntiAlias = true;
+
+    if (xStyle.length <= 0 || xStyle.span <= 0) {
+      canvas.drawLine(Offset(-mTranslateX, y), Offset(-mTranslateX + mWidth, y), paintX);
+    } else {
+      double startX = 0;
+      final maxX = -mTranslateX + mWidth;
+      final spaceX = 5 + 5;
+      while (startX < maxX) {
+        canvas.drawLine(Offset(startX, y), Offset(startX + 5, y), paintX);
+        startX += spaceX;
+      }
+    }
+
+    // Draw dot.
+    final paintD = Paint()
+      ..color = style.select.dot.color
+      ..strokeWidth = style.select.dot.diameter
+      .. isAntiAlias = true;
+
+    canvas.drawOval(Rect.fromCenter(center: Offset(x, y), height: style.select.dot.diameter, width: style.select.dot.diameter), paintD);
   }
 
   TextPainter getTextPainter(text, color) {

@@ -8,9 +8,6 @@ class ChartColors {
   final Color nowPriceDown;
   final Color nowPriceText;
 
-  final Color hCross;
-  final Color vCross;
-
   //当前显示内最大和最小值的颜色
   final Color maxColor;
   final Color minColor;
@@ -22,9 +19,6 @@ class ChartColors {
     this.nowPriceUp = const Color(0xff4DAA90),
     this.nowPriceDown = const Color(0xffC15466),
     this.nowPriceText = const Color(0xffffffff),
-
-    this.hCross = const Color(0xffffffff),
-    this.vCross = const Color(0x1Effffff),
 
     this.maxColor = const Color(0xffffffff),
     this.minColor = const Color(0xffffffff)
@@ -59,12 +53,6 @@ class ChartStyle {
   //点与点的距离
   double pointWidth;
 
-  //垂直交叉线宽度
-  double vCrossWidth;
-
-  //水平交叉线宽度
-  double hCrossWidth;
-
   //现在价格的线条长度
   double nowPriceLineLength;
 
@@ -95,8 +83,6 @@ class ChartStyle {
 
   ChartStyle({
     this.pointWidth = 11.0,
-    this.vCrossWidth = 8.5,
-    this.hCrossWidth = 0.5,
     this.nowPriceLineLength = 1,
     this.nowPriceLineSpan = 1,
     this.nowPriceLineWidth = 1,
@@ -276,13 +262,55 @@ class ChartSelectStyle {
 
   final ChartSelectColors colors;
 
+  /// Cross x line style when select dot.
+  final ChartCrossLineStyle x;
+
+  /// Cross y line style when select dot.
+  final ChartCrossLineStyle y;
+
+  final ChartCrossDotStyle dot;
+
   const ChartSelectStyle({
     this.radius = BorderRadius.zero,
     this.padding = const EdgeInsets.all(4),
     this.margin = const EdgeInsets.only(top: 25, left: 4),
     this.fontSize = 10,
     this.width,
-    this.colors = const ChartSelectColors()
+    this.colors = const ChartSelectColors(),
+    this.x = const ChartCrossLineStyle(),
+    this.y = const ChartCrossLineStyle(),
+    this.dot = const ChartCrossDotStyle()
+  });
+}
+
+class ChartCrossLineStyle {
+  /// Cross line width.
+  final double width;
+
+  /// Line span if draw dashed line. It will draw solid line if [span] or [length] not bigger than 0.
+  final double span;
+
+  /// Every length in dashed line. It will draw solid line if [span] or [length] not bigger than 0.
+  final double length;
+
+  /// Line color.
+  final Color color;
+
+  const ChartCrossLineStyle({
+    this.width = 0.5,
+    this.span = 5,
+    this.length = 5,
+    this.color = const Color(0xffffffff)
+  });
+}
+
+class ChartCrossDotStyle {
+  final double diameter;
+  final Color color;
+
+  const ChartCrossDotStyle({
+    this.diameter = 5,
+    this.color = const Color(0xffffffff)
   });
 }
 
@@ -293,12 +321,16 @@ class ChartSelectColors {
   final Color upText;
   final Color downText;
 
+  /// Selected dot color.
+  final Color dot;
+
   const ChartSelectColors({
     this.fill = const Color(0xff0D1722),
     this.border = const Color(0xff6C7A86),
     this.text = const Color(0xffffffff),
     this.upText = const Color(0xffff0000),
-    this.downText = const Color(0xff00ff00)
+    this.downText = const Color(0xff00ff00),
+    this.dot = const Color(0xffffffff)
   });
 }
 
