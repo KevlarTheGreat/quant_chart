@@ -45,7 +45,9 @@ class MyHomePageState extends State<MyHomePage> {
   bool isChangeUI = false;
   bool _isTrendLine = false;
 
-  ChartStyle chartStyle = ChartStyle();
+  ChartStyle chartStyle = ChartStyle(
+    select: const ChartSelectStyle(y: ChartCrossLineStyle(color: Colors.red, length: 20))
+  );
 
   @override
   void initState() {
@@ -113,8 +115,9 @@ class MyHomePageState extends State<MyHomePage> {
               translations: kChartTranslations,
               showNowPrice: _showNowPrice,
               hideGrid: _hideGrid,
-              isTapShowInfoDialog: false,
-              maDayList: const [1, 100, 1000]
+              isTapShowInfoDialog: true,
+              maDayList: const [1, 100, 1000],
+              dataFormat: (value) => value.toStringAsFixed(2),
             )
           ),
           if (showLoading) Container(

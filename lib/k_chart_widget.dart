@@ -141,6 +141,7 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
 
         return GestureDetector(
           onTapUp: (details) {
+            _stopAnimation();
             if (isLongPress || (isOnTap && widget.isTapShowInfoDialog)) {
               isOnTap = false;
               isLongPress = false;
@@ -169,6 +170,9 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
               }
               notifyChanged();
             }
+          },
+          onScaleStart: (details) {
+            isOnTap = false;
           },
           onScaleUpdate: (details) {
             if (isLongPress) return;
@@ -300,23 +304,24 @@ class _KChartWidgetState extends State<KChartWidget> with TickerProviderStateMix
 
 
   void _onFling(double x) {
-    _controller = AnimationController(duration: Duration(milliseconds: widget.flingTime), vsync: this);
+    _controller = AnimationController(duration: Duration(milliseconds: 1000), vsync: this);
     aniX = null;
     aniX = Tween<double>(begin: mScrollX, end: x * widget.flingRatio + mScrollX).animate(CurvedAnimation(parent: _controller!.view, curve: widget.flingCurve));
     aniX!.addListener(() {
       mScrollX = aniX!.value;
+
       if (mScrollX <= 0) {
         mScrollX = 0;
         _onLoadMore(true);
         _stopAnimation();
-        notifyChanged();
-        return;
+      } else if (mScrollX >= ChartPainter.maxScrollX - widget.xFrontPadding) {
+        _onLoadMore(false);
+        if (mScrollX >= ChartPainter.maxScrollX + widget.xFrontPadding) {
+          mScrollX = ChartPainter.maxScrollX;
+           _stopAnimation();
+        }
       }
 
-      if (mScrollX >= ChartPainter.maxScrollX - widget.xFrontPadding) _onLoadMore(false);
-      if (mScrollX >= ChartPainter.maxScrollX + widget.xFrontPadding) mScrollX = ChartPainter.maxScrollX + widget.xFrontPadding;
-
-      _stopAnimation();
       notifyChanged();
     });
 
