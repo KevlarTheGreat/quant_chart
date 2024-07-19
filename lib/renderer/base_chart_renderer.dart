@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_k_chart/renderer/index.dart';
+import 'package:k_chart_flutter/renderer/index.dart';
 
 export '../chart_style.dart';
 

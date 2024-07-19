@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:flutter_k_chart/chart_translations.dart';
-import 'package:flutter_k_chart/flutter_k_chart.dart';
+import 'package:k_chart_flutter/chart_translations.dart';
+import 'package:k_chart_flutter/k_chart_flutter.dart';
 
 void main() => runApp(const MyApp());
 

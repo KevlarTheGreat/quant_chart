@@ -2,15 +2,15 @@ import 'dart:async' show StreamSink;
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_k_chart/entity/info_window_entity.dart';
-import 'package:flutter_k_chart/entity/k_line_entity.dart';
-import 'package:flutter_k_chart/renderer/base_chart_painter.dart';
-import 'package:flutter_k_chart/renderer/base_chart_renderer.dart';
-import 'package:flutter_k_chart/renderer/main_renderer.dart';
-import 'package:flutter_k_chart/renderer/secondary_renderer.dart';
-import 'package:flutter_k_chart/renderer/vol_renderer.dart';
-import 'package:flutter_k_chart/utils/date_format_util.dart';
-import 'package:flutter_k_chart/utils/number_util.dart';
+import 'package:k_chart_flutter/entity/info_window_entity.dart';
+import 'package:k_chart_flutter/entity/k_line_entity.dart';
+import 'package:k_chart_flutter/renderer/base_chart_painter.dart';
+import 'package:k_chart_flutter/renderer/base_chart_renderer.dart';
+import 'package:k_chart_flutter/renderer/main_renderer.dart';
+import 'package:k_chart_flutter/renderer/secondary_renderer.dart';
+import 'package:k_chart_flutter/renderer/vol_renderer.dart';
+import 'package:k_chart_flutter/utils/date_format_util.dart';
+import 'package:k_chart_flutter/utils/number_util.dart';
 
 class TrendLine {
   final Offset p1;

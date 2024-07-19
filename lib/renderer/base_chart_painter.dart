@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart' show Color, TextStyle, Rect, Canvas, Size, CustomPainter;
-import 'package:flutter_k_chart/utils/date_format_util.dart';
+import 'package:k_chart_flutter/utils/date_format_util.dart';
 
 import '../chart_style.dart' show ChartStyle;
 import '../entity/k_line_entity.dart';

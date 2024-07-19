@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_k_chart/flutter_k_chart.dart';
+import 'package:k_chart_flutter/k_chart_flutter.dart';
 
 class VolRenderer extends BaseChartRenderer<VolumeEntity> {
   final VolumeRendererStyle style;
