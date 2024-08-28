@@ -70,7 +70,7 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
     if (span == null) return;
     TextPainter tp = TextPainter(text: span, textDirection: TextDirection.ltr);
     tp.layout();
-    tp.paint(canvas, Offset(x, chartRect.top - style.padding.top));
+    tp.paint(canvas, Offset(x, chartRect.top - style.padding.top + style.fontSize / 2));
   }
 
   List<InlineSpan> _createMATextSpan(CandleEntity data) {
@@ -209,13 +209,14 @@ class MainRenderer extends BaseChartRenderer<CandleEntity> {
   void drawGrid(Canvas canvas, int gridRows, int gridColumns) {
 //    final int gridRows = 4, gridColumns = 4;
     double rowSpace = chartRect.height / gridRows;
+    canvas.drawLine(Offset(0, 0), Offset(chartRect.width, 0), gridPaint);
     for (int i = 0; i <= gridRows; i++) {
       canvas.drawLine(Offset(0, rowSpace * i + style.padding.top),
           Offset(chartRect.width, rowSpace * i + style.padding.top), gridPaint);
     }
     double columnSpace = chartRect.width / gridColumns;
     for (int i = 0; i <= columnSpace; i++) {
-      canvas.drawLine(Offset(columnSpace * i, style.padding.top / 3),
+      canvas.drawLine(Offset(columnSpace * i, 0),
           Offset(columnSpace * i, chartRect.bottom), gridPaint);
     }
   }

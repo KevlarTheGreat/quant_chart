@@ -134,7 +134,7 @@ class MainRendererStyle extends RendererStyle {
     this.yAxisAlignment = VerticalTextAlignment.left,
     this.colors = const MainRendererColors(),
     super.fontSize = 10,
-    super.padding = const EdgeInsets.only(left: 5, right: 5, top: 30, bottom: 20)
+    super.padding = const EdgeInsets.only(left: 5, right: 5, top: 22, bottom: 20)
   }) : super(colors: colors);
 }
 
