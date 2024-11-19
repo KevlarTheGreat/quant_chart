@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:k_chart_flutter/renderer/index.dart';
+import 'package:quant_chart/renderer/index.dart';
 
 export '../chart_style.dart';
 
@@ -22,13 +22,12 @@ abstract class BaseChartRenderer<T> {
     ..strokeWidth = 0.5
     ..color = Color(0xff4c5c74);
 
-  BaseChartRenderer({
-    required this.style,
-    required this.chartRect,
-    required this.maxValue,
-    required this.minValue,
-    this.dataFormat
-  }) {
+  BaseChartRenderer(
+      {required this.style,
+      required this.chartRect,
+      required this.maxValue,
+      required this.minValue,
+      this.dataFormat}) {
     if (maxValue == minValue) {
       maxValue *= 1.5;
       minValue /= 2;
@@ -52,15 +51,19 @@ abstract class BaseChartRenderer<T> {
 
   void drawVerticalText(canvas, textStyle, int gridRows);
 
-  void drawChart(T lastPoint, T curPoint, double lastX, double curX, Size size, Canvas canvas);
+  void drawChart(T lastPoint, T curPoint, double lastX, double curX, Size size,
+      Canvas canvas);
 
-  void drawLine(double? lastPrice, double? curPrice, Canvas canvas, double lastX, double curX, Color color) {
+  void drawLine(double? lastPrice, double? curPrice, Canvas canvas,
+      double lastX, double curX, Color color) {
     if (lastPrice == null || curPrice == null) return;
 
     final lastY = getY(lastPrice);
     final curY = getY(curPrice);
-    canvas.drawLine(Offset(lastX, lastY), Offset(curX, curY), chartPaint..color = color);
+    canvas.drawLine(
+        Offset(lastX, lastY), Offset(curX, curY), chartPaint..color = color);
   }
 
-  TextStyle getTextStyle(Color color) => TextStyle(fontSize: style.fontSize, color: color);
+  TextStyle getTextStyle(Color color) =>
+      TextStyle(fontSize: style.fontSize, color: color);
 }

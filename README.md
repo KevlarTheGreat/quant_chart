@@ -1,4 +1,4 @@
-# k_chart_flutter
+# quant_chart
 K chart widget in Flutter.
 
 - Support gesture **drag**, **scale**, **long press**, **fling**.
@@ -9,7 +9,7 @@ K chart widget in Flutter.
 ### Install
 ```
 dependencies:
-  k_chart_flutter: ^1.0.0
+  quant_chart: ^0.0.1
 ```
 
 ### Usage
@@ -19,7 +19,7 @@ dependencies:
 DataUtil.calculate(data);
 
 // Use k chart widget:
-KChartWidget(
+QuantChart(
   data: data,
   style: ChartStyle(),
   isLine: true,

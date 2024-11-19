@@ -1,13 +1,15 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart' show Color, TextStyle, Rect, Canvas, Size, CustomPainter;
-import 'package:k_chart_flutter/utils/date_format_util.dart';
+import 'package:flutter/material.dart'
+    show Color, TextStyle, Rect, Canvas, Size, CustomPainter;
+import 'package:quant_chart/utils/date_format_util.dart';
 
 import '../chart_style.dart' show ChartStyle;
 import '../entity/k_line_entity.dart';
 import '../k_chart_widget.dart';
 
-export 'package:flutter/material.dart' show Color, required, TextStyle, Rect, Canvas, Size, CustomPainter;
+export 'package:flutter/material.dart'
+    show Color, required, TextStyle, Rect, Canvas, Size, CustomPainter;
 
 abstract class BaseChartPainter extends CustomPainter {
   static double maxScrollX = 0.0;
@@ -50,21 +52,20 @@ abstract class BaseChartPainter extends CustomPainter {
   List<String> mFormats = [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn]; //格式化时间
   double xFrontPadding;
 
-  BaseChartPainter({
-    required this.style,
-    this.data,
-    required this.scaleX,
-    required this.scrollX,
-    required this.isLongPress,
-    required this.selectX,
-    required this.xFrontPadding,
-    this.isOnTap = false,
-    this.mainState = MainState.MA,
-    this.volHidden = false,
-    this.isTapShowInfoDialog = false,
-    this.secondaryState = SecondaryState.MACD,
-    this.isLine = false
-  }) {
+  BaseChartPainter(
+      {required this.style,
+      this.data,
+      required this.scaleX,
+      required this.scrollX,
+      required this.isLongPress,
+      required this.selectX,
+      required this.xFrontPadding,
+      this.isOnTap = false,
+      this.mainState = MainState.MA,
+      this.volHidden = false,
+      this.isTapShowInfoDialog = false,
+      this.secondaryState = SecondaryState.MACD,
+      this.isLine = false}) {
     mItemCount = data?.length ?? 0;
     mPointWidth = style.pointWidth;
     mGridRows = style.gridRows;
@@ -89,17 +90,21 @@ abstract class BaseChartPainter extends CustomPainter {
     int time = secondTime - firstTime;
     time ~/= 1000;
     //月线
-    if (time >= 24 * 60 * 60 * 28) mFormats = [yy, '-', mm];
+    if (time >= 24 * 60 * 60 * 28)
+      mFormats = [yy, '-', mm];
     //日线等
-    else if (time >= 24 * 60 * 60) mFormats = [yy, '-', mm, '-', dd];
+    else if (time >= 24 * 60 * 60)
+      mFormats = [yy, '-', mm, '-', dd];
     //小时线等
-    else mFormats = [mm, '-', dd, ' ', HH, ':', nn];
+    else
+      mFormats = [mm, '-', dd, ' ', HH, ':', nn];
   }
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas.clipRect(Rect.fromLTRB(0, 0, size.width, size.height));
-    mDisplayHeight = size.height - style.main.padding.top - style.main.padding.bottom;
+    mDisplayHeight =
+        size.height - style.main.padding.top - style.main.padding.bottom;
     mWidth = size.width;
     initRect(size);
     calculateValue();
@@ -118,7 +123,8 @@ abstract class BaseChartPainter extends CustomPainter {
       drawMaxAndMin(canvas);
       drawNowPrice(canvas);
 
-      if (isLongPress == true || (isTapShowInfoDialog && isOnTap)) drawCrossLineText(canvas, size);
+      if (isLongPress == true || (isTapShowInfoDialog && isOnTap))
+        drawCrossLineText(canvas, size);
     }
     canvas.restore();
   }
@@ -157,23 +163,29 @@ abstract class BaseChartPainter extends CustomPainter {
 
   void initRect(Size size) {
     final volHeight = !volHidden ? mDisplayHeight * 0.2 : 0;
-    final secondaryHeight = secondaryState != SecondaryState.NONE ? mDisplayHeight * 0.2 : 0;
+    final secondaryHeight =
+        secondaryState != SecondaryState.NONE ? mDisplayHeight * 0.2 : 0;
 
     double mainHeight = mDisplayHeight;
     mainHeight -= volHeight;
     mainHeight -= secondaryHeight;
 
-    mMainRect = Rect.fromLTRB(0, style.main.padding.top, mWidth, style.main.padding.top + mainHeight);
-    if (volHidden != true) mVolRect = Rect.fromLTRB(0, mMainRect.bottom + style.secondary.padding.top, mWidth, mMainRect.bottom + volHeight);
+    mMainRect = Rect.fromLTRB(
+        0, style.main.padding.top, mWidth, style.main.padding.top + mainHeight);
+    if (volHidden != true)
+      mVolRect = Rect.fromLTRB(
+          0,
+          mMainRect.bottom + style.secondary.padding.top,
+          mWidth,
+          mMainRect.bottom + volHeight);
 
     //secondaryState == SecondaryState.NONE隐藏副视图
     if (secondaryState != SecondaryState.NONE) {
       mSecondaryRect = Rect.fromLTRB(
-        0,
-        mMainRect.bottom + volHeight + style.secondary.padding.top,
-        mWidth,
-        mMainRect.bottom + volHeight + secondaryHeight
-      );
+          0,
+          mMainRect.bottom + volHeight + style.secondary.padding.top,
+          mWidth,
+          mMainRect.bottom + volHeight + secondaryHeight);
     }
   }
 
@@ -317,11 +329,12 @@ abstract class BaseChartPainter extends CustomPainter {
   }
 
   ///scrollX 转换为 TranslateX
-  void setTranslateXFromScrollX(double scrollX) => mTranslateX = scrollX + getMinTranslateX();
+  void setTranslateXFromScrollX(double scrollX) =>
+      mTranslateX = scrollX + getMinTranslateX();
 
   ///获取平移的最小值
   double getMinTranslateX() {
-    var x = -mDataLen + mWidth / scaleX - mPointWidth / 2 -  xFrontPadding;
+    var x = -mDataLen + mWidth / scaleX - mPointWidth / 2 - xFrontPadding;
     return x >= 0 ? 0.0 : x;
   }
 
@@ -335,9 +348,11 @@ abstract class BaseChartPainter extends CustomPainter {
   }
 
   ///translateX转化为view中的x
-  double translateXtoX(double translateX) => (translateX + mTranslateX) * scaleX;
+  double translateXtoX(double translateX) =>
+      (translateX + mTranslateX) * scaleX;
 
-  TextStyle getTextStyle(Color color) => TextStyle(fontSize: style.dataFontSize, color: color);
+  TextStyle getTextStyle(Color color) =>
+      TextStyle(fontSize: style.dataFontSize, color: color);
 
   @override
   bool shouldRepaint(BaseChartPainter oldDelegate) => true;

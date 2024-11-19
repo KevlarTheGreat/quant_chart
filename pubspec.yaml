@@ -1,7 +1,7 @@
-name: k_chart_flutter
+name: quant_chart
 description: A k chart in FLutter.
-version: 0.1.0
-homepage: https://github.com/fxwalletOfficial/k_chart_flutter
+version: 0.0.1
+homepage: https://github.com/KevlarTheGreat/quant_chart
 
 environment:
   sdk: ">=3.0.0 <4.0.0"

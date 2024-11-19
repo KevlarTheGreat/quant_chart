@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'package:k_chart_flutter/chart_translations.dart';
-import 'package:k_chart_flutter/extension/map_ext.dart';
-import 'package:k_chart_flutter/k_chart_flutter.dart';
+import 'package:quant_chart/chart_translations.dart';
+import 'package:quant_chart/extension/map_ext.dart';
+import 'package:quant_chart/quant_chart.dart';
 
 class TimeFormat {
   static const List<String> YEAR_MONTH_DAY = [yyyy, '-', mm, '-', dd];
@@ -28,14 +28,15 @@ class KChartWidget extends StatefulWidget {
   final bool volHidden;
   final SecondaryState secondaryState;
   final bool isLine;
-  final bool isTapShowInfoDialog; //是否开启单击显示详情数据
+  final bool isTapShowInfoDialog; // Whether to enable tap to show detailed data
   final bool hideGrid;
   final bool showNowPrice;
   final bool showInfoDialog;
   final Map<String, ChartTranslations> translations;
   final List<String> timeFormat;
 
-  /// 当屏幕滚动到尽头会调用，真为拉到屏幕右侧尽头，假为拉到屏幕左侧尽头
+  /// Called when the screen scrolls to the end. True if scrolled to the
+  /// right end, false if scrolled to the left end.
   final Function(bool)? onLoadMore;
 
   final List<int> maDayList;
