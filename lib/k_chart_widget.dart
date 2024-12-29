@@ -54,7 +54,9 @@ class QuantChartWidget extends StatefulWidget {
       required this.style,
       required this.isTrendLine,
       this.xFrontPadding = 100,
+      // The type of indicator displayed in the main area
       this.mainState = MainState.MA,
+      // The type of indicator displayed in the secondary area
       this.secondaryState = SecondaryState.MACD,
       this.volHidden = false,
       this.isLine = false,
