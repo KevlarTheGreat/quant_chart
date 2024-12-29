@@ -43,7 +43,7 @@ class ChartTranslations {
   }
 }
 
-const kChartTranslations = {
+const quantChartTranslations = {
   'zh_CN': ChartTranslations(
     date: '时间',
     open: '开',
@@ -55,3 +55,5 @@ const kChartTranslations = {
     amount: '成交额',
   ),
 };
+
+

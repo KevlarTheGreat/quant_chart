@@ -104,7 +104,7 @@ class MyHomePageState extends State<MyHomePage> {
         SizedBox(
             height: 450,
             width: double.infinity,
-            child: KChartWidget(
+            child: QuantChartWidget(
               data: data,
               style: chartStyle,
               isLine: isLine,
@@ -113,7 +113,7 @@ class MyHomePageState extends State<MyHomePage> {
               volHidden: _volHidden,
               secondaryState: _secondaryState,
               timeFormat: TimeFormat.YEAR_MONTH_DAY,
-              translations: kChartTranslations,
+              translations: quantChartTranslations,
               showNowPrice: _showNowPrice,
               hideGrid: _hideGrid,
               isTapShowInfoDialog: true,

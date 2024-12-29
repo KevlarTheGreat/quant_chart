@@ -22,7 +22,7 @@ class TimeFormat {
   ];
 }
 
-class KChartWidget extends StatefulWidget {
+class QuantChartWidget extends StatefulWidget {
   final List<KLineEntity>? data;
   final MainState mainState;
   final bool volHidden;
@@ -49,7 +49,7 @@ class KChartWidget extends StatefulWidget {
   final double xFrontPadding;
   final String Function(double value)? dataFormat;
 
-  KChartWidget(
+  QuantChartWidget(
       {required this.data,
       required this.style,
       required this.isTrendLine,
@@ -62,7 +62,7 @@ class KChartWidget extends StatefulWidget {
       this.hideGrid = false,
       this.showNowPrice = true,
       this.showInfoDialog = true,
-      this.translations = kChartTranslations,
+      this.translations = quantChartTranslations,
       this.timeFormat = TimeFormat.YEAR_MONTH_DAY,
       this.onLoadMore,
       this.maDayList = const [5, 10, 20],
@@ -73,10 +73,10 @@ class KChartWidget extends StatefulWidget {
       this.dataFormat});
 
   @override
-  _KChartWidgetState createState() => _KChartWidgetState();
+  _QuantChartWidgetState createState() => _QuantChartWidgetState();
 }
 
-class _KChartWidgetState extends State<KChartWidget>
+class _QuantChartWidgetState extends State<QuantChartWidget>
     with TickerProviderStateMixin {
   double mScaleX = 1.0;
   double mScrollX = 0.0;
