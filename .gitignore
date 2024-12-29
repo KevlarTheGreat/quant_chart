@@ -70,3 +70,11 @@ build/
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 example/ios/Flutter/flutter_export_environment.sh
 *.lock
+# Ignore generated Plugins
+example/linux/flutter/generated_plugin_registrant.cc
+example/linux/flutter/generated_plugin_registrant.h
+example/linux/flutter/generated_plugins.cmake
+example/macos/Flutter/GeneratedPluginRegistrant.swift
+example/windows/flutter/generated_plugin_registrant.cc
+example/windows/flutter/generated_plugin_registrant.h
+example/windows/flutter/generated_plugins.cmake
